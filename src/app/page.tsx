@@ -1,150 +1,182 @@
 /**
- * Main dashboard page for HEATDEBT.
- * Two-panel layout: interactive Leaflet map (left) + district detail panel (right).
- * Fetches real data from Open-Meteo, Census ACS, AirNow, and Montgomery ArcGIS.
+ * Landing page for HEATDEBT — public marketing page.
  */
 
-"use client";
+import Link from "next/link";
+import {
+  Thermometer,
+  DollarSign,
+  MapPin,
+  Zap,
+  Brain,
+  FileText,
+  ArrowRight,
+  Database,
+} from "lucide-react";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import type { District } from "@/lib/district-data";
-import { RISK_TIER_HEX } from "@/lib/constants";
-import { useDistrictData } from "@/hooks/use-district-data";
-import DistrictDetailPanel from "@/components/dashboard/district-detail-panel";
-import HeatmapLegend from "@/components/dashboard/heatmap-legend";
-import CityOverviewBar from "@/components/dashboard/city-overview-bar";
-import { MapPin, Loader2 } from "lucide-react";
+const STATS = [
+  { value: "60s", label: "Time to generate a full risk report" },
+  { value: "$127K", label: "Average grant value per neighborhood" },
+  { value: "14", label: "Montgomery neighborhoods analyzed" },
+  { value: "8x", label: "Faster than manual EJ assessments" },
+  { value: "6", label: "Live data layers integrated" },
+];
 
-/** Dynamically import Leaflet map (no SSR — Leaflet requires window) */
-const DistrictMap = dynamic(
-  () => import("@/components/dashboard/district-map"),
+const PILLARS = [
   {
-    ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center w-full h-full bg-card/20 rounded-lg">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-          <p className="text-sm text-muted-foreground mt-2">Loading map...</p>
-        </div>
-      </div>
-    ),
+    icon: Thermometer,
+    title: "Live Intelligence",
+    description:
+      "Real-time thermal, demographic, and environmental data from NWS, Census ACS, EPA AirNow, and Montgomery Open Data — updated every 10 minutes.",
   },
-);
+  {
+    icon: Brain,
+    title: "AI Correlation",
+    description:
+      "Google Gemini analyzes the intersection of heat exposure, poverty, tree canopy, A/C access, and vacancy rates to score neighborhood vulnerability 0-100.",
+  },
+  {
+    icon: FileText,
+    title: "Grant Automation",
+    description:
+      "One-click EPA Environmental Justice grant narratives with auto-filled budget tables, intervention priorities, and copy-ready application text.",
+  },
+];
 
-export default function Home() {
-  const { districts, weather, isLoading, error, dataSource, lastUpdated } =
-    useDistrictData();
-  const [selectedDistrict, setSelectedDistrict] = useState<District | null>(
-    null,
-  );
-
-  // Auto-select first district once data loads
-  if (districts.length > 0 && !selectedDistrict) {
-    setSelectedDistrict(districts[0]);
-  }
-
+export default function LandingPage() {
   return (
-    <>
-      {/* City overview bar with live weather */}
-      <CityOverviewBar
-        weather={weather}
-        districts={districts}
-        dataSource={dataSource}
-        lastUpdated={lastUpdated}
-      />
-
-      {error && (
-        <div className="bg-orange-500/10 border-b border-orange-500/20 px-4 py-1.5">
-          <p className="text-xs text-orange-400 text-center">{error}</p>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-xl items-center justify-between px-4 mx-auto">
+          <h1 className="font-extrabold text-xl tracking-tight">
+            <span className="text-primary-foreground">HEAT</span>
+            <span className="text-orange-500">DEBT</span>
+          </h1>
+          <Link
+            href="/login"
+            className="text-sm font-medium text-muted-foreground hover:text-primary-foreground transition-colors"
+          >
+            Login
+          </Link>
         </div>
-      )}
+      </nav>
 
-      <main className="flex h-[calc(100vh-3.5rem-3.5rem)] flex-col lg:flex-row">
-        {/* Map panel */}
-        <div className="flex-1 relative p-2 lg:p-4 hidden lg:block">
-          {isLoading ? (
-            <div className="flex items-center justify-center w-full h-full bg-card/20 rounded-lg">
-              <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                <p className="text-sm text-muted-foreground mt-2">
-                  Fetching live data from Montgomery...
+      {/* Hero */}
+      <section className="container max-w-screen-xl mx-auto px-4 pt-20 pb-16 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 text-xs text-orange-400 mb-6">
+          <Zap className="h-3 w-3" />
+          Powered by Google Gemini AI
+        </div>
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-primary-foreground max-w-4xl mx-auto leading-tight">
+          Every neighborhood has a{" "}
+          <span className="text-orange-500">heat debt</span>. We help you
+          measure and repay it.
+        </h2>
+        <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          Real-time urban thermal intelligence for Montgomery, Alabama. Identify
+          the most heat-vulnerable communities, generate AI-powered risk
+          analyses, and auto-fill EPA grant applications — in seconds.
+        </p>
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/login"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            Get Started
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <a
+            href="#pillars"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-6 py-3 text-sm font-medium text-muted-foreground hover:text-primary-foreground hover:border-primary-foreground/30 transition-colors"
+          >
+            Learn More
+          </a>
+        </div>
+      </section>
+
+      {/* Stats Row */}
+      <section className="border-y border-border/50 bg-card/30">
+        <div className="container max-w-screen-xl mx-auto px-4 py-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+            {STATS.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <p className="text-3xl font-extrabold text-orange-500">
+                  {stat.value}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stat.label}
                 </p>
               </div>
-            </div>
-          ) : (
-            <DistrictMap
-              districts={districts}
-              selectedDistrict={selectedDistrict}
-              onSelectDistrict={setSelectedDistrict}
-            />
-          )}
-
-          {/* Map legend overlay */}
-          <div className="absolute bottom-6 left-6 z-[1000]">
-            <HeatmapLegend />
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Mobile district selector — scrollable pill buttons with risk tier colors */}
-        <div className="lg:hidden px-4 pt-3 pb-1">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-            Select Neighborhood
+      {/* Three Pillars */}
+      <section
+        id="pillars"
+        className="container max-w-screen-xl mx-auto px-4 py-20"
+      >
+        <div className="text-center mb-12">
+          <h3 className="text-2xl font-bold text-primary-foreground">
+            Three Layers of Intelligence
+          </h3>
+          <p className="text-sm text-muted-foreground mt-2 max-w-lg mx-auto">
+            From raw sensor data to grant-ready documents, HEATDEBT automates
+            the entire environmental justice workflow.
           </p>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {districts.map((district) => {
-              const isActive = selectedDistrict?.id === district.id;
-              const tierColor = RISK_TIER_HEX[district.riskTier];
-              return (
-                <button
-                  key={district.id}
-                  onClick={() => setSelectedDistrict(district)}
-                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
-                    isActive
-                      ? "text-white"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80 border-transparent"
-                  }`}
-                  style={
-                    isActive
-                      ? {
-                          backgroundColor: `${tierColor}30`,
-                          borderColor: tierColor,
-                          color: tierColor,
-                        }
-                      : undefined
-                  }
-                >
-                  <span
-                    className="inline-block w-2 h-2 rounded-full mr-1.5"
-                    style={{ backgroundColor: tierColor }}
-                  />
-                  {district.name}
-                </button>
-              );
-            })}
-          </div>
         </div>
-
-        {/* Detail panel */}
-        <div className="w-full lg:w-[420px] lg:max-w-md xl:w-[480px] xl:max-w-xl bg-card/50 lg:border-l lg:border-border overflow-y-auto">
-          {selectedDistrict ? (
-            <DistrictDetailPanel district={selectedDistrict} />
-          ) : (
-            <div className="flex h-full items-center justify-center p-8 text-center">
-              <div>
-                <MapPin className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h2 className="mt-4 text-xl font-semibold">
-                  Select a Neighborhood
-                </h2>
-                <p className="mt-1 text-muted-foreground">
-                  Click on the map to view detailed heat and community data for
-                  any of Montgomery&apos;s 14 neighborhoods.
-                </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {PILLARS.map((pillar) => (
+            <div
+              key={pillar.title}
+              className="rounded-xl border border-border/50 bg-card/50 p-6 space-y-4"
+            >
+              <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                <pillar.icon className="h-6 w-6 text-orange-500" />
               </div>
+              <h4 className="text-lg font-bold text-primary-foreground">
+                {pillar.title}
+              </h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {pillar.description}
+              </p>
             </div>
-          )}
+          ))}
         </div>
-      </main>
-    </>
+      </section>
+
+      {/* Data Sources */}
+      <section className="border-t border-border/50 bg-card/20">
+        <div className="container max-w-screen-xl mx-auto px-4 py-12 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Database className="h-4 w-4 text-muted-foreground" />
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Data Sources
+            </p>
+          </div>
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+            NWS Weather API &middot; Open-Meteo &middot; US Census ACS &middot;
+            EPA AirNow &middot; Montgomery ArcGIS Open Data &middot; CartoDB
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border/50">
+        <div className="container max-w-screen-xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-orange-500" />
+            <span className="text-sm text-muted-foreground">
+              Montgomery, Alabama
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Built by Erisa &amp; Adeline &middot; GenAI Hackathon 2026
+          </p>
+        </div>
+      </footer>
+    </div>
   );
 }

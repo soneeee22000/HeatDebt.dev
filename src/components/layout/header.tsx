@@ -1,15 +1,28 @@
 /**
- * Application header with HEATDEBT branding.
+ * Application header with HEATDEBT branding and logout.
  */
 
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { clearAuthCookie } from "@/lib/auth";
+import { LogOut } from "lucide-react";
 
 export default function Header() {
+  const router = useRouter();
+
+  function handleSignOut() {
+    clearAuthCookie();
+    router.push("/login");
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center px-4">
         <div className="flex-1 flex items-center">
-          <Link href="/" className="flex items-baseline space-x-1">
+          <Link href="/dashboard" className="flex items-baseline space-x-1">
             <h1 className="font-extrabold text-xl tracking-tight">
               <span className="text-primary-foreground">HEAT</span>
               <span className="text-orange-500">DEBT</span>
@@ -26,6 +39,15 @@ export default function Header() {
               Google Gemini
             </span>
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSignOut}
+            className="text-muted-foreground hover:text-primary-foreground"
+          >
+            <LogOut className="h-4 w-4 mr-1.5" />
+            Sign Out
+          </Button>
         </div>
       </div>
     </header>

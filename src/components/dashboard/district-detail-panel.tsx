@@ -23,9 +23,12 @@ import {
   Home,
   TrendingDown,
   Download,
+  FileBarChart,
 } from "lucide-react";
+import { useState } from "react";
 import GrantReportGenerator from "./grant-report-generator";
 import DistrictSummaryCard from "./district-summary-card";
+import PaymentModal from "./payment-modal";
 import { generateDistrictPDF } from "./pdf-report";
 import { Button } from "@/components/ui/button";
 
@@ -97,6 +100,7 @@ export default function DistrictDetailPanel({
   district,
 }: DistrictDetailPanelProps) {
   const riskColor = HEAT_RISK_HEX[district.heatRisk];
+  const [paymentOpen, setPaymentOpen] = useState(false);
 
   return (
     <div className="h-full p-4 lg:p-6 space-y-5">
@@ -297,8 +301,15 @@ export default function DistrictDetailPanel({
         />
       </div>
 
-      {/* PDF Download */}
-      <div className="pt-2 pb-6">
+      {/* Full Report + PDF Download */}
+      <div className="pt-2 pb-6 space-y-3">
+        <Button
+          className="w-full bg-primary hover:bg-primary/90"
+          onClick={() => setPaymentOpen(true)}
+        >
+          <FileBarChart className="mr-2 h-4 w-4" />
+          Generate Full Report
+        </Button>
         <Button
           variant="outline"
           className="w-full border-accent/30 hover:bg-accent/10"
@@ -311,6 +322,12 @@ export default function DistrictDetailPanel({
           Generate AI analyses above first for a complete report
         </p>
       </div>
+
+      <PaymentModal
+        district={district}
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+      />
     </div>
   );
 }
