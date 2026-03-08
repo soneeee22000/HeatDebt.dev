@@ -1,17 +1,23 @@
 /**
  * Interactive Leaflet map displaying Montgomery, AL districts.
- * Each district is a clickable GeoJSON polygon color-coded by heat risk.
- * Includes pulsing dots at district centroids indicating risk level.
+ * Each district is a clickable GeoJSON polygon color-coded by the active layer.
+ * Supports dynamic recoloring when the user switches vulnerability layers.
  * Uses CartoDB dark tiles to match the app's dark theme.
  */
 
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { District } from "@/lib/district-data";
 import { heatRiskHexColors, riskTierHexColors } from "@/lib/district-data";
+import type { MapLayer } from "@/lib/map-layers";
+import {
+  getLayerColor,
+  computeLayerRange,
+  MAP_LAYER_CONFIG,
+} from "@/lib/map-layers";
 import {
   MONTGOMERY_CENTER,
   MAP_ZOOM,
@@ -25,17 +31,36 @@ interface DistrictMapProps {
   districts: District[];
   selectedDistrict: District | null;
   onSelectDistrict: (district: District) => void;
+  activeLayer: MapLayer;
+}
+
+/**
+ * Get the fill color for a district based on the active layer.
+ */
+function getDistrictColor(
+  district: District,
+  layer: MapLayer,
+  layerRange: { min: number; max: number } | null,
+): string {
+  if (layer === "score") {
+    return heatRiskHexColors[district.heatRisk];
+  }
+  if (!layerRange) return heatRiskHexColors[district.heatRisk];
+  const value = MAP_LAYER_CONFIG[layer].extractValue(district);
+  return getLayerColor(layer, value, layerRange.min, layerRange.max);
 }
 
 export default function DistrictMap({
   districts,
   selectedDistrict,
   onSelectDistrict,
+  activeLayer,
 }: DistrictMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const layersRef = useRef<Map<number, L.GeoJSON>>(new Map());
   const markersRef = useRef<Map<number, L.Marker>>(new Map());
+  const districtsRef = useRef<Map<number, District>>(new Map());
 
   // Initialize map once
   useEffect(() => {
@@ -61,7 +86,11 @@ export default function DistrictMap({
     };
   }, []);
 
-  // Render district polygons + pulsing dots
+  // Stable callback ref for district selection
+  const onSelectRef = useRef(onSelectDistrict);
+  onSelectRef.current = onSelectDistrict;
+
+  // Build district polygon layers (only when districts change)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || districts.length === 0) return;
@@ -71,68 +100,40 @@ export default function DistrictMap({
     layersRef.current.clear();
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current.clear();
+    districtsRef.current.clear();
 
     districts.forEach((district) => {
-      const isSelected = selectedDistrict?.id === district.id;
-      const color = heatRiskHexColors[district.heatRisk];
-      const tierColor = riskTierHexColors[district.riskTier];
+      districtsRef.current.set(district.id, district);
 
       const layer = L.geoJSON(district.feature, {
         style: {
           ...DISTRICT_POLYGON_STYLE,
-          fillColor: color,
-          color: isSelected ? SELECTED_POLYGON_STYLE.color : color,
-          weight: isSelected
-            ? SELECTED_POLYGON_STYLE.weight
-            : DISTRICT_POLYGON_STYLE.weight,
-          fillOpacity: isSelected
-            ? SELECTED_POLYGON_STYLE.fillOpacity
-            : DISTRICT_POLYGON_STYLE.fillOpacity,
+          fillColor: "#666",
+          color: "#666",
         },
       });
 
-      // Tooltip with district info
-      layer.bindTooltip(
-        `<div class="text-sm font-semibold">${district.name}</div>
-         <div class="text-xs" style="color:${tierColor}">${district.riskTier} · Score ${district.heatScore}/100</div>
-         <div class="text-xs">Heat Index: ${district.heatIndex}°F</div>
-         <div class="text-xs">Tract ${district.censusTract}</div>`,
-        {
-          sticky: true,
-          className: "district-tooltip",
-        },
-      );
-
-      // Click handler
       layer.on("click", () => {
-        onSelectDistrict(district);
+        onSelectRef.current(district);
       });
 
-      // Hover effects
       layer.on("mouseover", (e) => {
         const target = e.target as L.GeoJSON;
-        if (selectedDistrict?.id !== district.id) {
-          target.setStyle({
-            fillOpacity: 0.7,
-            weight: 3,
-          });
-        }
+        target.setStyle({ fillOpacity: 0.7, weight: 3 });
       });
 
       layer.on("mouseout", (e) => {
         const target = e.target as L.GeoJSON;
-        if (selectedDistrict?.id !== district.id) {
-          target.setStyle({
-            fillOpacity: DISTRICT_POLYGON_STYLE.fillOpacity,
-            weight: DISTRICT_POLYGON_STYLE.weight,
-          });
-        }
+        target.setStyle({
+          fillOpacity: DISTRICT_POLYGON_STYLE.fillOpacity,
+          weight: DISTRICT_POLYGON_STYLE.weight,
+        });
       });
 
       layer.addTo(map);
       layersRef.current.set(district.id, layer);
 
-      // Add pulsing dot marker at centroid
+      // Pulsing dot marker at centroid
       const pulseClass =
         district.riskTier === "CRITICAL"
           ? "pulse-critical"
@@ -155,13 +156,61 @@ export default function DistrictMap({
       });
 
       marker.on("click", () => {
-        onSelectDistrict(district);
+        onSelectRef.current(district);
       });
 
       marker.addTo(map);
       markersRef.current.set(district.id, marker);
     });
-  }, [districts, selectedDistrict, onSelectDistrict]);
+  }, [districts]);
+
+  // Update polygon styles when activeLayer or selectedDistrict changes
+  useEffect(() => {
+    if (districts.length === 0) return;
+
+    const layerRange =
+      activeLayer !== "score"
+        ? computeLayerRange(activeLayer, districts)
+        : null;
+
+    layersRef.current.forEach((geoLayer, districtId) => {
+      const district = districtsRef.current.get(districtId);
+      if (!district) return;
+
+      const isSelected = selectedDistrict?.id === districtId;
+      const fillColor = getDistrictColor(district, activeLayer, layerRange);
+      const tierColor = riskTierHexColors[district.riskTier];
+
+      // Build tooltip based on active layer
+      let tooltipMetric = `<div class="text-xs" style="color:${tierColor}">${district.riskTier} · Score ${district.heatScore}/100</div>`;
+      if (activeLayer !== "score") {
+        const config = MAP_LAYER_CONFIG[activeLayer];
+        const value = Math.round(config.extractValue(district));
+        tooltipMetric = `<div class="text-xs" style="color:${fillColor}">${config.label}: ${value}${config.unit}</div>
+         <div class="text-xs" style="color:${tierColor}">${district.riskTier} · Score ${district.heatScore}/100</div>`;
+      }
+
+      geoLayer.unbindTooltip();
+      geoLayer.bindTooltip(
+        `<div class="text-sm font-semibold">${district.name}</div>
+         ${tooltipMetric}
+         <div class="text-xs">Heat Index: ${district.heatIndex}°F</div>
+         <div class="text-xs">Tract ${district.censusTract}</div>`,
+        { sticky: true, className: "district-tooltip" },
+      );
+
+      geoLayer.setStyle({
+        fillColor,
+        color: isSelected ? SELECTED_POLYGON_STYLE.color : fillColor,
+        weight: isSelected
+          ? SELECTED_POLYGON_STYLE.weight
+          : DISTRICT_POLYGON_STYLE.weight,
+        fillOpacity: isSelected
+          ? SELECTED_POLYGON_STYLE.fillOpacity
+          : DISTRICT_POLYGON_STYLE.fillOpacity,
+      });
+    });
+  }, [activeLayer, selectedDistrict, districts]);
 
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-lg overflow-hidden border border-border/20">

@@ -9,10 +9,12 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import type { District } from "@/lib/district-data";
+import type { MapLayer } from "@/lib/map-layers";
 import { RISK_TIER_HEX } from "@/lib/constants";
 import { useDistrictData } from "@/hooks/use-district-data";
 import DistrictDetailPanel from "@/components/dashboard/district-detail-panel";
 import HeatmapLegend from "@/components/dashboard/heatmap-legend";
+import MapLayerControl from "@/components/dashboard/map-layer-control";
 import CityOverviewBar from "@/components/dashboard/city-overview-bar";
 import Header from "@/components/layout/header";
 import { MapPin, Loader2 } from "lucide-react";
@@ -39,6 +41,7 @@ export default function DashboardPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<District | null>(
     null,
   );
+  const [activeLayer, setActiveLayer] = useState<MapLayer>("score");
 
   // Auto-select first district once data loads
   useEffect(() => {
@@ -82,12 +85,21 @@ export default function DashboardPage() {
               districts={districts}
               selectedDistrict={selectedDistrict}
               onSelectDistrict={setSelectedDistrict}
+              activeLayer={activeLayer}
             />
           )}
 
+          {/* Layer control overlay */}
+          <div className="absolute bottom-24 left-6 z-[1000]">
+            <MapLayerControl
+              activeLayer={activeLayer}
+              onLayerChange={setActiveLayer}
+            />
+          </div>
+
           {/* Map legend overlay */}
           <div className="absolute bottom-6 left-6 z-[1000]">
-            <HeatmapLegend />
+            <HeatmapLegend activeLayer={activeLayer} districts={districts} />
           </div>
         </div>
 
@@ -133,7 +145,11 @@ export default function DashboardPage() {
         {/* Detail panel */}
         <div className="w-full lg:w-[420px] lg:max-w-md xl:w-[480px] xl:max-w-xl bg-card/50 lg:border-l lg:border-border overflow-y-auto">
           {selectedDistrict ? (
-            <DistrictDetailPanel district={selectedDistrict} />
+            <DistrictDetailPanel
+              district={selectedDistrict}
+              activeLayer={activeLayer}
+              onLayerChange={setActiveLayer}
+            />
           ) : (
             <div className="flex h-full items-center justify-center p-8 text-center">
               <div>

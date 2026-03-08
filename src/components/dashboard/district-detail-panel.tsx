@@ -8,6 +8,7 @@
 import type { District } from "@/lib/district-data";
 import { HEAT_RISK_HEX, RISK_TIER_HEX } from "@/lib/constants";
 import type { RiskTier } from "@/lib/constants";
+import type { MapLayer } from "@/lib/map-layers";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -34,6 +35,8 @@ import { Button } from "@/components/ui/button";
 
 interface DistrictDetailPanelProps {
   district: District;
+  activeLayer: MapLayer;
+  onLayerChange: (layer: MapLayer) => void;
 }
 
 interface StatItemProps {
@@ -96,8 +99,19 @@ function RiskTierBadge({ tier }: { tier: RiskTier }) {
   );
 }
 
+/** Map vulnerability bar labels to MapLayer keys */
+const VULN_BAR_LAYERS: Record<string, Exclude<MapLayer, "score">> = {
+  "Heat Exposure": "heatExposure",
+  "Tree Canopy": "treeCanopy",
+  "A/C Access Gap": "acAccess",
+  "Poverty Rate": "povertyRate",
+  "Vacancy Rate": "vacancyRate",
+};
+
 export default function DistrictDetailPanel({
   district,
+  activeLayer,
+  onLayerChange,
 }: DistrictDetailPanelProps) {
   const riskColor = HEAT_RISK_HEX[district.heatRisk];
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -145,32 +159,48 @@ export default function DistrictDetailPanel({
           Vulnerability Factors
         </h3>
         <div className="space-y-2.5">
-          <VulnerabilityBar
-            label="Heat Exposure"
-            value={Math.min(100, Math.max(0, (district.heatIndex - 85) * 5))}
-            color="text-red-400"
-          />
-          <VulnerabilityBar
-            label="Tree Canopy"
-            value={district.treeCanopyPct}
-            color="text-green-400"
-            inverted
-          />
-          <VulnerabilityBar
-            label="A/C Access Gap"
-            value={100 - district.acAccessPercentage}
-            color="text-blue-400"
-          />
-          <VulnerabilityBar
-            label="Poverty Rate"
-            value={district.povertyRate}
-            color="text-amber-400"
-          />
-          <VulnerabilityBar
-            label="Vacancy Rate"
-            value={district.vacancyRate}
-            color="text-purple-400"
-          />
+          {[
+            {
+              label: "Heat Exposure",
+              value: Math.min(100, Math.max(0, (district.heatIndex - 85) * 5)),
+              color: "text-red-400",
+            },
+            {
+              label: "Tree Canopy",
+              value: district.treeCanopyPct,
+              color: "text-green-400",
+              inverted: true,
+            },
+            {
+              label: "A/C Access Gap",
+              value: 100 - district.acAccessPercentage,
+              color: "text-blue-400",
+            },
+            {
+              label: "Poverty Rate",
+              value: district.povertyRate,
+              color: "text-amber-400",
+            },
+            {
+              label: "Vacancy Rate",
+              value: district.vacancyRate,
+              color: "text-purple-400",
+            },
+          ].map((bar) => {
+            const layerKey = VULN_BAR_LAYERS[bar.label];
+            const isActive = activeLayer === layerKey;
+            return (
+              <VulnerabilityBar
+                key={bar.label}
+                label={bar.label}
+                value={bar.value}
+                color={bar.color}
+                inverted={bar.inverted}
+                isActive={isActive}
+                onClick={() => onLayerChange(isActive ? "score" : layerKey)}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -385,17 +415,21 @@ function HeatScoreRing({ score }: { score: number }) {
   );
 }
 
-/** Visual progress bar for vulnerability factors */
+/** Visual progress bar for vulnerability factors — clickable to toggle map layer */
 function VulnerabilityBar({
   label,
   value,
   color,
   inverted = false,
+  isActive = false,
+  onClick,
 }: {
   label: string;
   value: number;
   color: string;
   inverted?: boolean;
+  isActive?: boolean;
+  onClick?: () => void;
 }) {
   const displayValue = Math.round(value);
   const severity = inverted
@@ -411,14 +445,27 @@ function VulnerabilityBar({
         : "Low";
 
   return (
-    <div className="space-y-1">
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full text-left space-y-1 rounded-lg px-2.5 py-2 transition-all cursor-pointer ${
+        isActive ? "bg-accent/10 ring-1 ring-accent/40" : "hover:bg-muted/30"
+      }`}
+    >
       <div className="flex justify-between items-center">
-        <span className="text-xs text-muted-foreground">{label}</span>
+        <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+          {label}
+          {isActive && (
+            <span className="text-[9px] font-semibold text-accent uppercase tracking-wider">
+              on map
+            </span>
+          )}
+        </span>
         <span className={`text-xs font-medium ${color}`}>
           {displayValue}% · {severity}
         </span>
       </div>
       <Progress value={displayValue} className="h-1.5" />
-    </div>
+    </button>
   );
 }
