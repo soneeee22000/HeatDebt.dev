@@ -55,7 +55,7 @@ export async function GET() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
 
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${MONTGOMERY_LAT}&longitude=${MONTGOMERY_LNG}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,apparent_temperature,wind_direction_10m&timezone=America%2FChicago`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${MONTGOMERY_LAT}&longitude=${MONTGOMERY_LNG}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,apparent_temperature,wind_direction_10m,precipitation,uv_index&timezone=America%2FChicago`;
 
     const res = await fetch(url, { signal: controller.signal });
     clearTimeout(timeout);
@@ -72,6 +72,8 @@ export async function GET() {
           windSpeed: kmhToMph(current.wind_speed_10m),
           windDirection: degreesToCardinal(current.wind_direction_10m),
           textDescription: weatherCodeToDesc(current.weather_code),
+          precipitation: current.precipitation ?? 0,
+          uvIndex: current.uv_index ?? 0,
           timestamp: data.current.time,
           source: "Open-Meteo",
         },

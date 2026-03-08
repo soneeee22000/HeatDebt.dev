@@ -149,6 +149,7 @@ export default function DashboardPage() {
               district={selectedDistrict}
               activeLayer={activeLayer}
               onLayerChange={setActiveLayer}
+              weather={weather}
             />
           ) : (
             <div className="flex h-full items-center justify-center p-8 text-center">

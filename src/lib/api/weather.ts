@@ -14,6 +14,8 @@ export interface WeatherData {
   textDescription: string;
   timestamp: string; // ISO 8601
   icon: string; // NWS icon URL
+  precipitation: number; // mm
+  uvIndex: number; // 0-11+ scale
 }
 
 /** Fallback weather data for Montgomery, AL if NWS API is down */
@@ -26,6 +28,8 @@ const FALLBACK_WEATHER: WeatherData = {
   textDescription: "Partly Cloudy",
   timestamp: new Date().toISOString(),
   icon: "",
+  precipitation: 0,
+  uvIndex: 6,
 };
 
 /**

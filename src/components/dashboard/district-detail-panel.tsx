@@ -6,6 +6,7 @@
 "use client";
 
 import type { District } from "@/lib/district-data";
+import type { WeatherData } from "@/lib/api/weather";
 import { HEAT_RISK_HEX, RISK_TIER_HEX } from "@/lib/constants";
 import type { RiskTier } from "@/lib/constants";
 import type { MapLayer } from "@/lib/map-layers";
@@ -14,15 +15,14 @@ import { Progress } from "@/components/ui/progress";
 import {
   Thermometer,
   Users,
-  TreePine,
+  Sun,
   Wind,
-  AirVent,
+  CloudRain,
+  Droplets,
   Building,
   AlertTriangle,
   ShieldAlert,
   MapPin,
-  Home,
-  TrendingDown,
   Download,
   FileBarChart,
 } from "lucide-react";
@@ -37,6 +37,7 @@ interface DistrictDetailPanelProps {
   district: District;
   activeLayer: MapLayer;
   onLayerChange: (layer: MapLayer) => void;
+  weather?: WeatherData | null;
 }
 
 interface StatItemProps {
@@ -112,6 +113,7 @@ export default function DistrictDetailPanel({
   district,
   activeLayer,
   onLayerChange,
+  weather,
 }: DistrictDetailPanelProps) {
   const riskColor = HEAT_RISK_HEX[district.heatRisk];
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -216,10 +218,10 @@ export default function DistrictDetailPanel({
             value={district.population.toLocaleString()}
           />
           <StatItem
-            icon={TreePine}
-            label="Tree Canopy"
-            value={district.treeCanopyPct}
-            unit="%"
+            icon={Sun}
+            label="UV Index"
+            value={weather?.uvIndex ?? "N/A"}
+            isLive
           />
           <StatItem
             icon={Wind}
@@ -227,22 +229,27 @@ export default function DistrictDetailPanel({
             value={district.pollutionRate}
           />
           <StatItem
-            icon={AirVent}
-            label="A/C Access"
-            value={district.acAccessPercentage}
-            unit="%"
+            icon={CloudRain}
+            label="Precipitation"
+            value={weather?.precipitation ?? 0}
+            unit="mm"
+            isLive
           />
           <StatItem
-            icon={Home}
-            label="Vacancy"
-            value={district.vacancyRate}
+            icon={Droplets}
+            label="Humidity"
+            value={weather?.relativeHumidity ?? "N/A"}
             unit="%"
+            isLive
           />
           <StatItem
-            icon={TrendingDown}
-            label="Poverty"
-            value={district.povertyRate}
-            unit="%"
+            icon={Building}
+            label="Cooling Centers"
+            value={
+              district.communityFacilities.length +
+              district.nearbyFacilities.length
+            }
+            unit="nearby"
           />
         </div>
       </div>
