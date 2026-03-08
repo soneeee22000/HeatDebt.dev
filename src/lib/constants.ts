@@ -4,7 +4,7 @@
  */
 
 /** Montgomery, AL center coordinates [lat, lng] */
-export const MONTGOMERY_CENTER: [number, number] = [32.3668, -86.3];
+export const MONTGOMERY_CENTER: [number, number] = [32.38, -86.31];
 
 /** Default map zoom level */
 export const MAP_ZOOM = 12;
