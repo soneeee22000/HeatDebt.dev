@@ -32,6 +32,7 @@ interface DistrictMapProps {
   selectedDistrict: District | null;
   onSelectDistrict: (district: District) => void;
   activeLayer: MapLayer;
+  polygonsVisible: boolean;
 }
 
 /**
@@ -55,6 +56,7 @@ export default function DistrictMap({
   selectedDistrict,
   onSelectDistrict,
   activeLayer,
+  polygonsVisible,
 }: DistrictMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -163,6 +165,20 @@ export default function DistrictMap({
       markersRef.current.set(district.id, marker);
     });
   }, [districts]);
+
+  // Toggle polygon visibility
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    layersRef.current.forEach((geoLayer) => {
+      if (polygonsVisible) {
+        if (!map.hasLayer(geoLayer)) geoLayer.addTo(map);
+      } else {
+        if (map.hasLayer(geoLayer)) geoLayer.remove();
+      }
+    });
+  }, [polygonsVisible]);
 
   // Update polygon styles when activeLayer or selectedDistrict changes
   useEffect(() => {

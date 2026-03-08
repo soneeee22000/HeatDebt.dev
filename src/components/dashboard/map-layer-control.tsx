@@ -17,6 +17,8 @@ import {
   Users,
   Wind,
   Building,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 const LAYER_ICONS: Record<MapLayer, React.ElementType> = {
@@ -46,17 +48,44 @@ const LAYERS: MapLayer[] = [
 interface MapLayerControlProps {
   activeLayer: MapLayer;
   onLayerChange: (layer: MapLayer) => void;
+  polygonsVisible: boolean;
+  onTogglePolygons: () => void;
 }
 
 export default function MapLayerControl({
   activeLayer,
   onLayerChange,
+  polygonsVisible,
+  onTogglePolygons,
 }: MapLayerControlProps) {
   return (
     <div className="rounded-lg border border-border bg-card/90 p-2 shadow-lg backdrop-blur-sm">
-      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 px-1">
-        Map Layer
-      </p>
+      <div className="flex items-center justify-between mb-1.5 px-1">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+          Map Layer
+        </p>
+        <button
+          type="button"
+          onClick={onTogglePolygons}
+          className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all ${
+            polygonsVisible
+              ? "text-accent hover:text-accent/80"
+              : "text-muted-foreground hover:text-primary-foreground"
+          }`}
+          title={
+            polygonsVisible
+              ? "Hide district polygons"
+              : "Show district polygons"
+          }
+        >
+          {polygonsVisible ? (
+            <Eye className="h-3 w-3" />
+          ) : (
+            <EyeOff className="h-3 w-3" />
+          )}
+          {polygonsVisible ? "On" : "Off"}
+        </button>
+      </div>
       <div className="grid grid-cols-3 gap-1">
         {LAYERS.map((layer) => {
           const isActive = activeLayer === layer;

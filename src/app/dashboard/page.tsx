@@ -42,6 +42,7 @@ export default function DashboardPage() {
     null,
   );
   const [activeLayer, setActiveLayer] = useState<MapLayer>("score");
+  const [polygonsVisible, setPolygonsVisible] = useState(true);
 
   // Auto-select first district once data loads
   useEffect(() => {
@@ -86,6 +87,7 @@ export default function DashboardPage() {
               selectedDistrict={selectedDistrict}
               onSelectDistrict={setSelectedDistrict}
               activeLayer={activeLayer}
+              polygonsVisible={polygonsVisible}
             />
           )}
 
@@ -94,6 +96,8 @@ export default function DashboardPage() {
             <MapLayerControl
               activeLayer={activeLayer}
               onLayerChange={setActiveLayer}
+              polygonsVisible={polygonsVisible}
+              onTogglePolygons={() => setPolygonsVisible((v) => !v)}
             />
           </div>
 
