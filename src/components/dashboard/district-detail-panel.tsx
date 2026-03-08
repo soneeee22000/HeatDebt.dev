@@ -6,8 +6,9 @@
 "use client";
 
 import type { District } from "@/lib/district-data";
-import { HEAT_RISK_HEX } from "@/lib/constants";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HEAT_RISK_HEX, RISK_TIER_HEX } from "@/lib/constants";
+import type { RiskTier } from "@/lib/constants";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
   Thermometer,
@@ -19,12 +20,14 @@ import {
   AlertTriangle,
   ShieldAlert,
   MapPin,
+  Home,
+  TrendingDown,
+  Download,
 } from "lucide-react";
 import GrantReportGenerator from "./grant-report-generator";
 import DistrictSummaryCard from "./district-summary-card";
 import { generateDistrictPDF } from "./pdf-report";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 
 interface DistrictDetailPanelProps {
   district: District;
@@ -38,6 +41,7 @@ interface StatItemProps {
   isLive?: boolean;
 }
 
+/** Individual stat display */
 function StatItem({
   icon: Icon,
   label,
@@ -72,6 +76,23 @@ function StatItem({
   );
 }
 
+/** Risk tier badge */
+function RiskTierBadge({ tier }: { tier: RiskTier }) {
+  const color = RISK_TIER_HEX[tier];
+  return (
+    <span
+      className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border"
+      style={{
+        color,
+        borderColor: `${color}50`,
+        backgroundColor: `${color}15`,
+      }}
+    >
+      {tier}
+    </span>
+  );
+}
+
 export default function DistrictDetailPanel({
   district,
 }: DistrictDetailPanelProps) {
@@ -82,35 +103,35 @@ export default function DistrictDetailPanel({
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <div
-            className="h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: riskColor }}
-          />
-          <span
-            className="text-xs font-bold uppercase tracking-wider"
-            style={{ color: riskColor }}
-          >
-            {district.heatRisk} Risk
+          <RiskTierBadge tier={district.riskTier} />
+          <span className="text-[10px] text-muted-foreground">
+            Tract {district.censusTract}
           </span>
         </div>
         <h2 className="text-2xl font-extrabold text-primary-foreground">
           {district.name}
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          District {district.id} — Montgomery, AL
+          Score {district.heatScore}/100 — Montgomery, AL
         </p>
       </div>
 
-      {/* Live Heat Index */}
+      {/* HEATDEBT Score Ring + Heat Index */}
       <Card className="bg-transparent border-accent/20 shadow-none">
-        <CardContent className="p-3">
-          <StatItem
-            icon={Thermometer}
-            label="Current Heat Index"
-            value={district.heatIndex}
-            unit="°F"
-            isLive
-          />
+        <CardContent className="p-3 space-y-2">
+          {/* Score ring */}
+          <div className="flex items-center gap-4">
+            <HeatScoreRing score={district.heatScore} />
+            <div className="flex-1 space-y-1">
+              <StatItem
+                icon={Thermometer}
+                label="Current Heat Index"
+                value={district.heatIndex}
+                unit="°F"
+                isLive
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -126,8 +147,8 @@ export default function DistrictDetailPanel({
             color="text-red-400"
           />
           <VulnerabilityBar
-            label="Green Space Coverage"
-            value={district.greenSpacePercentage}
+            label="Tree Canopy"
+            value={district.treeCanopyPct}
             color="text-green-400"
             inverted
           />
@@ -135,6 +156,16 @@ export default function DistrictDetailPanel({
             label="A/C Access Gap"
             value={100 - district.acAccessPercentage}
             color="text-blue-400"
+          />
+          <VulnerabilityBar
+            label="Poverty Rate"
+            value={district.povertyRate}
+            color="text-amber-400"
+          />
+          <VulnerabilityBar
+            label="Vacancy Rate"
+            value={district.vacancyRate}
+            color="text-purple-400"
           />
         </div>
       </div>
@@ -152,8 +183,8 @@ export default function DistrictDetailPanel({
           />
           <StatItem
             icon={TreePine}
-            label="Green Space"
-            value={district.greenSpacePercentage}
+            label="Tree Canopy"
+            value={district.treeCanopyPct}
             unit="%"
           />
           <StatItem
@@ -165,6 +196,18 @@ export default function DistrictDetailPanel({
             icon={AirVent}
             label="A/C Access"
             value={district.acAccessPercentage}
+            unit="%"
+          />
+          <StatItem
+            icon={Home}
+            label="Vacancy"
+            value={district.vacancyRate}
+            unit="%"
+          />
+          <StatItem
+            icon={TrendingDown}
+            label="Poverty"
+            value={district.povertyRate}
             unit="%"
           />
         </div>
@@ -238,14 +281,20 @@ export default function DistrictDetailPanel({
         </p>
       </div>
 
-      {/* AI Risk Analysis */}
+      {/* AI Risk Analysis — key forces remount on district change */}
       <div className="pt-2">
-        <DistrictSummaryCard district={district} />
+        <DistrictSummaryCard
+          key={`summary-${district.id}`}
+          district={district}
+        />
       </div>
 
-      {/* AI Grant Report Tool */}
+      {/* AI Grant Report Tool — key forces remount on district change */}
       <div>
-        <GrantReportGenerator district={district} />
+        <GrantReportGenerator
+          key={`grant-${district.id}`}
+          district={district}
+        />
       </div>
 
       {/* PDF Download */}
@@ -261,6 +310,59 @@ export default function DistrictDetailPanel({
         <p className="text-[10px] text-muted-foreground text-center mt-1.5">
           Generate AI analyses above first for a complete report
         </p>
+      </div>
+    </div>
+  );
+}
+
+/** HEATDEBT vulnerability score ring (0-100) */
+function HeatScoreRing({ score }: { score: number }) {
+  const color =
+    score >= 75
+      ? "#ef4444"
+      : score >= 50
+        ? "#f97316"
+        : score >= 25
+          ? "#f59e0b"
+          : "#22c55e";
+
+  const circumference = 2 * Math.PI * 36;
+  const strokeDashoffset = circumference - (score / 100) * circumference;
+
+  return (
+    <div className="relative flex items-center justify-center w-20 h-20 flex-shrink-0">
+      <svg className="transform -rotate-90 w-20 h-20" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r="36"
+          stroke="currentColor"
+          strokeWidth="6"
+          fill="none"
+          className="text-muted/30"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r="36"
+          strokeWidth="6"
+          fill="none"
+          strokeLinecap="round"
+          style={{
+            stroke: color,
+            strokeDasharray: circumference,
+            strokeDashoffset,
+            transition: "stroke-dashoffset 1s ease-out",
+          }}
+        />
+      </svg>
+      <div className="absolute flex flex-col items-center">
+        <span className="text-lg font-bold" style={{ color }}>
+          {score}
+        </span>
+        <span className="text-[8px] text-muted-foreground uppercase tracking-wide">
+          / 100
+        </span>
       </div>
     </div>
   );
@@ -295,7 +397,9 @@ function VulnerabilityBar({
     <div className="space-y-1">
       <div className="flex justify-between items-center">
         <span className="text-xs text-muted-foreground">{label}</span>
-        <span className={`text-xs font-medium ${color}`}>{severity}</span>
+        <span className={`text-xs font-medium ${color}`}>
+          {displayValue}% · {severity}
+        </span>
       </div>
       <Progress value={displayValue} className="h-1.5" />
     </div>

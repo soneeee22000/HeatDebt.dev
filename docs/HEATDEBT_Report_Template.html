@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HEATDEBT Report — West Montgomery Census Tract 14.02</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --red:    #C0392B;
+    --orange: #E67E22;
+    --ink:    #1A1A2A;
+    --mid:    #5A5A72;
+    --light:  #F4F3EF;
+    --white:  #FFFFFF;
+    --rule:   #D8D6CE;
+    --teal:   #0D6E6E;
+    --gold:   #B8860B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #E8E6DE;
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  /* PRINT WRAPPER */
+  .page {
+    max-width: 820px;
+    margin: 40px auto;
+    background: var(--white);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.18);
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: var(--ink);
+    padding: 56px 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(192,57,43,0.15);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(192,57,43,0.08);
+  }
+  .cover-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 20px; position: relative;
+  }
+  .cover h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px; line-height: 1.15;
+    color: #FFFFFF; margin-bottom: 8px;
+    position: relative;
+  }
+  .cover h1 em {
+    font-style: italic; color: var(--orange);
+  }
+  .cover-sub {
+    color: rgba(255,255,255,0.55);
+    font-size: 15px; margin-bottom: 40px;
+    position: relative;
+  }
+  .cover-meta {
+    display: flex; gap: 32px; flex-wrap: wrap;
+    position: relative;
+  }
+  .meta-item { }
+  .meta-label { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 3px; }
+  .meta-value { font-size: 15px; font-weight: 600; color: #FFFFFF; }
+  .risk-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--red); color: #fff;
+    padding: 6px 16px; border-radius: 4px;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; margin-top: 28px;
+    position: relative;
+  }
+  .score-ring {
+    position: absolute; right: 60px; top: 50px;
+    width: 100px; height: 100px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 3px solid var(--red); border-radius: 50%;
+  }
+  .score-num { font-size: 32px; font-weight: 700; color: var(--red); line-height: 1; }
+  .score-lbl { font-size: 10px; color: rgba(255,255,255,0.45); letter-spacing: 1px; }
+
+  /* ── BODY SECTIONS ── */
+  .body { padding: 0; }
+
+  /* Section wrapper */
+  .sec {
+    padding: 40px 60px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .sec:last-child { border-bottom: none; }
+
+  /* Section heading */
+  .sec-num {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--orange);
+    margin-bottom: 6px;
+  }
+  .sec h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px; color: var(--ink);
+    margin-bottom: 18px; line-height: 1.2;
+  }
+  .sec p {
+    color: #3A3A4A; font-size: 14px; line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  .sec p:last-of-type { margin-bottom: 0; }
+
+  /* ── DATA TABLE ── */
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin: 24px 0;
+  }
+  .data-cell {
+    background: var(--white);
+    padding: 18px 20px;
+  }
+  .data-cell.header-cell {
+    background: var(--light);
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--mid);
+    padding: 10px 20px;
+  }
+  .data-cell.highlight { background: #FFF5F5; }
+  .dc-label { font-size: 11px; color: var(--mid); margin-bottom: 4px; }
+  .dc-value { font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
+  .dc-value.hot  { color: var(--red); }
+  .dc-value.warn { color: var(--orange); }
+  .dc-value.ok   { color: var(--teal); }
+  .dc-sub { font-size: 11px; color: var(--mid); margin-top: 3px; }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+  .compare-table th {
+    background: var(--ink); color: #fff;
+    padding: 10px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .compare-table td {
+    padding: 11px 16px; border-bottom: 1px solid var(--rule);
+    color: #3A3A4A;
+  }
+  .compare-table tr:nth-child(even) td { background: var(--light); }
+  .compare-table .val-bad  { color: var(--red);    font-weight: 700; }
+  .compare-table .val-warn { color: var(--orange); font-weight: 700; }
+  .compare-table .val-ok   { color: var(--teal);   font-weight: 600; }
+
+  /* ── INTERVENTION CARDS ── */
+  .intervention {
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--teal);
+    padding: 20px 24px;
+    margin: 16px 0;
+    background: var(--white);
+  }
+  .intervention.priority-1 { border-left-color: var(--red); }
+  .intervention.priority-2 { border-left-color: var(--orange); }
+  .intervention.priority-3 { border-left-color: var(--teal); }
+  .int-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .int-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .int-priority { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; }
+  .pr1 { background: rgba(192,57,43,0.1); color: var(--red); }
+  .pr2 { background: rgba(230,126,34,0.1); color: var(--orange); }
+  .pr3 { background: rgba(13,110,110,0.1); color: var(--teal); }
+  .int-stats { display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap; }
+  .int-stat { }
+  .int-stat-label { font-size: 10px; color: var(--mid); text-transform: uppercase; letter-spacing: 1px; }
+  .int-stat-value { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .int-desc { font-size: 13px; color: #4A4A5A; line-height: 1.7; }
+
+  /* ── GRANT SECTION ── */
+  .grant-box {
+    background: var(--light);
+    border: 1px solid var(--rule);
+    padding: 28px 32px;
+    margin: 20px 0;
+  }
+  .grant-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+  .grant-name { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--ink); }
+  .grant-amount { font-size: 22px; font-weight: 700; color: var(--teal); }
+  .grant-meta { display: flex; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
+  .grant-meta-item { }
+  .gm-label { font-size: 10px; color: var(--mid); text-transform: uppercase; letter-spacing: 1px; }
+  .gm-value { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+  /* ── NARRATIVE ── */
+  .narrative {
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--gold);
+    padding: 28px 32px;
+    margin: 20px 0;
+    background: #FFFDF5;
+  }
+  .narrative-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .narrative p {
+    font-family: 'DM Serif Display', serif;
+    font-size: 15px; color: var(--ink);
+    line-height: 1.85; font-style: italic;
+    margin-bottom: 14px;
+  }
+  .narrative p.plain {
+    font-family: 'DM Sans', sans-serif;
+    font-style: normal; font-size: 14px;
+  }
+  .narrative .template-var {
+    background: rgba(184,134,11,0.12);
+    color: var(--gold); font-weight: 600;
+    font-style: normal; font-family: 'DM Sans', monospace;
+    padding: 1px 6px; border-radius: 3px; font-size: 13px;
+  }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    background: var(--ink);
+    padding: 24px 60px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .report-footer .brand { color: var(--orange); font-weight: 700; font-size: 15px; }
+  .report-footer .sources { font-size: 11px; color: rgba(255,255,255,0.4); text-align: right; }
+
+  /* PRINT */
+  @media print {
+    body { background: white; }
+    .page { margin: 0; box-shadow: none; }
+    .sec { page-break-inside: avoid; }
+  }
+
+  @media(max-width:600px) {
+    .cover, .sec { padding-left: 24px; padding-right: 24px; }
+    .data-grid { grid-template-columns: 1fr 1fr; }
+    .score-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══════════ COVER ══════════ -->
+  <div class="cover">
+    <div class="score-ring">
+      <div class="score-num">84</div>
+      <div class="score-lbl">/ 100</div>
+    </div>
+    <div class="cover-eyebrow">HEATDEBT · THERMAL EQUITY REPORT</div>
+    <h1>West Montgomery<br><em>Is Burning.</em></h1>
+    <p class="cover-sub">Census Tract 14.02 · Montgomery, Alabama · Summer 2024</p>
+    <div class="cover-meta">
+      <div class="meta-item">
+        <div class="meta-label">Generated</div>
+        <div class="meta-value">March 5, 2026</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Population</div>
+        <div class="meta-value">3,841 residents</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Data Sources</div>
+        <div class="meta-value">NASA · US Census · EPA</div>
+      </div>
+    </div>
+    <div class="risk-badge">⚠ Critical Risk Zone</div>
+  </div>
+
+  <div class="body">
+
+    <!-- ══════════ SECTION 1: THE NUMBERS ══════════ -->
+    <div class="sec">
+      <div class="sec-num">Section 01</div>
+      <h2>The Thermal Reality</h2>
+      <p>
+        This neighborhood recorded an average summer surface temperature of <strong>39.4°C</strong> —
+        <strong>7.4 degrees above the city average</strong> of 32.0°C. This difference is not random.
+        It is the direct result of decades of disinvestment: less tree canopy, more dark asphalt,
+        older buildings with minimal insulation, and fewer green spaces.
+      </p>
+
+      <!-- Key stats grid -->
+      <div class="data-grid">
+        <div class="data-cell header-cell">Temperature</div>
+        <div class="data-cell header-cell">Demographics</div>
+        <div class="data-cell header-cell">Infrastructure</div>
+
+        <div class="data-cell highlight">
+          <div class="dc-label">Avg Surface Temp (Summer)</div>
+          <div class="dc-value hot">39.4°C</div>
+          <div class="dc-sub">vs. city avg 32.0°C</div>
+        </div>
+        <div class="data-cell highlight">
+          <div class="dc-label">Poverty Rate</div>
+          <div class="dc-value hot">67.2%</div>
+          <div class="dc-sub">vs. city avg 19.7%</div>
+        </div>
+        <div class="data-cell highlight">
+          <div class="dc-label">Tree Canopy Coverage</div>
+          <div class="dc-value warn">4.1%</div>
+          <div class="dc-sub">vs. city avg 23%</div>
+        </div>
+
+        <div class="data-cell">
+          <div class="dc-label">Peak Day Temperature</div>
+          <div class="dc-value hot">44.1°C</div>
+          <div class="dc-sub">July 18, 2024</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">Residents aged 65+</div>
+          <div class="dc-value warn">22.8%</div>
+          <div class="dc-sub">~876 people</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">Impervious Surface</div>
+          <div class="dc-value hot">89%</div>
+          <div class="dc-sub">asphalt + concrete</div>
+        </div>
+
+        <div class="data-cell">
+          <div class="dc-label">Days above 38°C (2024)</div>
+          <div class="dc-value warn">31 days</div>
+          <div class="dc-sub">city avg: 18 days</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">No Air Conditioning</div>
+          <div class="dc-value hot">31%</div>
+          <div class="dc-sub">~1,191 households</div>
+        </div>
+        <div class="data-cell">
+          <div class="dc-label">Nearest Cooling Center</div>
+          <div class="dc-value warn">2.3 mi</div>
+          <div class="dc-sub">no public transit</div>
+        </div>
+      </div>
+
+      <!-- Neighborhood comparison -->
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Neighborhood</th>
+            <th>Avg Temp</th>
+            <th>Poverty</th>
+            <th>Tree Cover</th>
+            <th>Heat Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>West Montgomery (this report)</strong></td>
+            <td class="val-bad">39.4°C</td>
+            <td class="val-bad">67.2%</td>
+            <td class="val-bad">4.1%</td>
+            <td class="val-bad">84 / 100</td>
+          </tr>
+          <tr>
+            <td>Central Montgomery</td>
+            <td class="val-warn">35.1°C</td>
+            <td class="val-warn">38.4%</td>
+            <td class="val-warn">11%</td>
+            <td class="val-warn">52 / 100</td>
+          </tr>
+          <tr>
+            <td>East Montgomery (Eastchase)</td>
+            <td class="val-ok">31.8°C</td>
+            <td class="val-ok">9.1%</td>
+            <td class="val-ok">31%</td>
+            <td class="val-ok">18 / 100</td>
+          </tr>
+          <tr>
+            <td>City Average</td>
+            <td>32.0°C</td>
+            <td>19.7%</td>
+            <td>23%</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══════════ SECTION 2: WHY ══════════ -->
+    <div class="sec">
+      <div class="sec-num">Section 02</div>
+      <h2>Why This Neighborhood Overheats</h2>
+      <p>
+        Three compounding physical factors drive this neighborhood's extreme heat. First, <strong>89% of
+        the surface area is impervious</strong> — dark asphalt roads, parking lots, and concrete absorb
+        solar radiation during the day and release it as heat at night, preventing the area from cooling down.
+      </p>
+      <p>
+        Second, <strong>tree canopy covers only 4.1%</strong> of the area compared to 23% city-wide.
+        Trees provide shade (blocking direct solar gain), transpire water (cooling the air), and
+        interrupt heat absorption in pavement. Their near-total absence removes the city's most
+        cost-effective cooling mechanism.
+      </p>
+      <p>
+        Third, the neighborhood lacks the <strong>green space and water features</strong> present in
+        wealthier areas. Eastchase has parks and retention ponds; West Montgomery has neither.
+        This is a pattern consistent with historical redlining: neighborhoods denied mortgage
+        investment in the 1940s–60s received systematically less green infrastructure and have
+        never recovered.
+      </p>
+    </div>
+
+    <!-- ══════════ SECTION 3: INTERVENTIONS ══════════ -->
+    <div class="sec">
+      <div class="sec-num">Section 03</div>
+      <h2>Recommended Interventions</h2>
+      <p>
+        The following interventions are ranked by temperature reduction per dollar spent.
+        All cost estimates are based on Montgomery-area contractor data and peer-reviewed urban
+        heat island literature.
+      </p>
+
+      <div class="intervention priority-1">
+        <div class="int-header">
+          <div class="int-title">🌳 Urban Tree Planting Program — Priority Corridors</div>
+          <span class="int-priority pr1">Priority 1</span>
+        </div>
+        <p class="int-desc">
+          Plant 48 mature shade trees (minimum 3" caliper) along the 4 main residential corridors
+          identified as having the highest surface temperatures. Species selected for heat tolerance
+          and low water needs: Southern Magnolia, Bald Cypress, Water Oak.
+        </p>
+        <div class="int-stats">
+          <div class="int-stat">
+            <div class="int-stat-label">Estimated Cost</div>
+            <div class="int-stat-value">$36,000</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Temp Reduction</div>
+            <div class="int-stat-value">-3.8°F in 5 years</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">People Benefiting</div>
+            <div class="int-stat-value">~2,200 directly</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Timeline</div>
+            <div class="int-stat-value">90 days to plant</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="intervention priority-2">
+        <div class="int-header">
+          <div class="int-title">🛣️ Cool Pavement Coating — High-Exposure Streets</div>
+          <span class="int-priority pr2">Priority 2</span>
+        </div>
+        <p class="int-desc">
+          Apply reflective cool pavement coating (albedo 0.50+) to the 6 blocks with highest
+          measured surface temperatures. Coating reflects solar radiation rather than absorbing it.
+          Most effective on streets with minimal shade (which describes most of this tract).
+        </p>
+        <div class="int-stats">
+          <div class="int-stat">
+            <div class="int-stat-label">Estimated Cost</div>
+            <div class="int-stat-value">$18,000</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Temp Reduction</div>
+            <div class="int-stat-value">-2.1°F immediate</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Blocks Covered</div>
+            <div class="int-stat-value">6 priority blocks</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Timeline</div>
+            <div class="int-stat-value">30 days</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="intervention priority-3">
+        <div class="int-header">
+          <div class="int-title">🏠 Emergency AC Unit Distribution + Weatherization</div>
+          <span class="int-priority pr3">Priority 3</span>
+        </div>
+        <p class="int-desc">
+          Target the 340 households identified as highest risk (elderly + no AC + below poverty line).
+          Distribute portable AC units and provide basic window weatherization. This addresses
+          immediate heat mortality risk while longer-term structural solutions are implemented.
+        </p>
+        <div class="int-stats">
+          <div class="int-stat">
+            <div class="int-stat-label">Estimated Cost</div>
+            <div class="int-stat-value">$85,000</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Lives Protected</div>
+            <div class="int-stat-value">340 households</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Mortality Reduction</div>
+            <div class="int-stat-value">Est. -60% heat risk</div>
+          </div>
+          <div class="int-stat">
+            <div class="int-stat-label">Timeline</div>
+            <div class="int-stat-value">14 days</div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size:13px; color:var(--mid); margin-top:16px;">
+        <strong>Total intervention package:</strong> $139,000 · Projected temperature reduction: -5.9°F over 5 years ·
+        Estimated lives protected from acute heat illness: 340+ annually
+      </p>
+    </div>
+
+    <!-- ══════════ SECTION 4: GRANT ══════════ -->
+    <div class="sec">
+      <div class="sec-num">Section 04</div>
+      <h2>Recommended Grant &amp; Application Narrative</h2>
+      <p>
+        Based on this neighborhood's profile, the following federal grant is the strongest match.
+        The application narrative below is ready to submit with minimal editing.
+      </p>
+
+      <div class="grant-box">
+        <div class="grant-header">
+          <div>
+            <div class="grant-name">EPA Environmental Justice Collaborative Problem-Solving Grant</div>
+            <div style="font-size:12px; color:var(--mid); margin-top:4px;">CFDA Number: 66.306 · U.S. Environmental Protection Agency</div>
+          </div>
+          <div class="grant-amount">Up to $1,000,000</div>
+        </div>
+        <div class="grant-meta">
+          <div class="grant-meta-item">
+            <div class="gm-label">Application Deadline</div>
+            <div class="gm-value">Rolling · Next window: May 2026</div>
+          </div>
+          <div class="grant-meta-item">
+            <div class="gm-label">Eligible Applicants</div>
+            <div class="gm-value">City governments, nonprofits, tribal governments</div>
+          </div>
+          <div class="grant-meta-item">
+            <div class="gm-label">Match Required</div>
+            <div class="gm-value">No match required</div>
+          </div>
+          <div class="grant-meta-item">
+            <div class="gm-label">Why This Fits</div>
+            <div class="gm-value">Environmental justice + urban heat + low-income census tract</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- THE NARRATIVE TEMPLATE -->
+      <div class="narrative">
+        <div class="narrative-label">📄 Grant Application Narrative — Ready to Submit</div>
+        <p>
+          Census Tract <span class="template-var">{{TRACT_ID}}</span> in
+          <span class="template-var">{{CITY_NAME}}</span>, Alabama faces a
+          documented environmental justice crisis driven by extreme urban heat inequality.
+          During summer <span class="template-var">{{YEAR}}</span>, this neighborhood recorded
+          an average surface temperature of <span class="template-var">{{AVG_TEMP_C}}</span>°C —
+          <span class="template-var">{{TEMP_DELTA}}</span> degrees above the city average —
+          while <span class="template-var">{{POVERTY_RATE}}</span>% of its
+          <span class="template-var">{{POPULATION}}</span> residents live below the federal
+          poverty line.
+        </p>
+        <p class="plain">
+          This thermal burden falls disproportionately on the most vulnerable: an estimated
+          <span class="template-var">{{ELDERLY_COUNT}}</span> residents aged 65 and older,
+          <span class="template-var">{{NO_AC_HOUSEHOLDS}}</span> households without air conditioning,
+          and outdoor workers concentrated in this area's industrial and service sectors.
+          With tree canopy coverage of only <span class="template-var">{{TREE_PCT}}</span>% —
+          compared to <span class="template-var">{{CITY_TREE_PCT}}</span>% city-wide —
+          the neighborhood lacks the natural cooling infrastructure present in wealthier areas,
+          a disparity directly traceable to historical patterns of residential disinvestment.
+        </p>
+        <p class="plain">
+          The City of <span class="template-var">{{CITY_NAME}}</span> proposes a three-phase
+          urban heat intervention program: (1) planting <span class="template-var">{{TREE_COUNT}}</span>
+          mature shade trees along identified priority corridors, projected to reduce ambient
+          temperatures by <span class="template-var">{{TREE_TEMP_REDUCTION}}</span>°F within five
+          years; (2) applying reflective cool pavement coating to
+          <span class="template-var">{{PAVEMENT_BLOCKS}}</span> high-exposure blocks, with an
+          immediate projected temperature reduction of <span class="template-var">{{PAVE_TEMP_REDUCTION}}</span>°F;
+          and (3) distributing emergency cooling units and weatherization services to
+          <span class="template-var">{{AC_HOUSEHOLDS}}</span> highest-risk households ahead of
+          the <span class="template-var">{{NEXT_SUMMER}}</span> heat season.
+        </p>
+        <p class="plain">
+          This proposal directly addresses EPA Environmental Justice priorities by protecting
+          a low-income community of color from a documented, measurable environmental harm
+          using data-driven interventions with quantified outcomes. Total project cost:
+          <span class="template-var">{{TOTAL_COST}}</span>. HEATDEBT thermal analysis data,
+          NASA Landsat satellite imagery, and US Census demographic data are available as
+          supporting documentation.
+        </p>
+      </div>
+
+      <p style="font-size:12px; color:var(--mid);">
+        <strong>Instructions:</strong> Replace all <code style="font-size:11px; background:#f0f0e8; padding:1px 5px; border-radius:3px;">{{VARIABLE}}</code> fields with data from this report.
+        Attach the HEATDEBT thermal map export and the demographic data table as Exhibits A and B.
+        This narrative meets the 2-page limit for Section 2 (Problem Statement + Proposed Solution).
+      </p>
+    </div>
+
+  </div><!-- end body -->
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    <div>
+      <div class="brand">🌡️ HEATDEBT</div>
+      <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:2px;">Thermal Equity Intelligence Platform</div>
+    </div>
+    <div class="sources">
+      Data: NASA Landsat 8/9 · US Census ACS 5-Year · EPA EJSCREEN<br>
+      Generated by HEATDEBT AI · Not a substitute for professional grant writing advice
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

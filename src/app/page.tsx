@@ -1,7 +1,7 @@
 /**
- * Main dashboard page for HeatAlert.
+ * Main dashboard page for HEATDEBT.
  * Two-panel layout: interactive Leaflet map (left) + district detail panel (right).
- * Fetches real data from NWS weather API and Montgomery ArcGIS Open Data.
+ * Fetches real data from Open-Meteo, Census ACS, AirNow, and Montgomery ArcGIS.
  */
 
 "use client";
@@ -9,6 +9,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import type { District } from "@/lib/district-data";
+import { RISK_TIER_HEX } from "@/lib/constants";
 import { useDistrictData } from "@/hooks/use-district-data";
 import DistrictDetailPanel from "@/components/dashboard/district-detail-panel";
 import HeatmapLegend from "@/components/dashboard/heatmap-legend";
@@ -59,7 +60,7 @@ export default function Home() {
         </div>
       )}
 
-      <main className="flex h-[calc(100vh-3.5rem-2.5rem)] flex-col lg:flex-row">
+      <main className="flex h-[calc(100vh-3.5rem-3.5rem)] flex-col lg:flex-row">
         {/* Map panel */}
         <div className="flex-1 relative p-2 lg:p-4 hidden lg:block">
           {isLoading ? (
@@ -85,22 +86,42 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile district selector */}
+        {/* Mobile district selector — scrollable pill buttons with risk tier colors */}
         <div className="lg:hidden px-4 pt-3 pb-1">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
+            Select Neighborhood
+          </p>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {districts.map((district) => (
-              <button
-                key={district.id}
-                onClick={() => setSelectedDistrict(district)}
-                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  selectedDistrict?.id === district.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {district.name}
-              </button>
-            ))}
+            {districts.map((district) => {
+              const isActive = selectedDistrict?.id === district.id;
+              const tierColor = RISK_TIER_HEX[district.riskTier];
+              return (
+                <button
+                  key={district.id}
+                  onClick={() => setSelectedDistrict(district)}
+                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border ${
+                    isActive
+                      ? "text-white"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80 border-transparent"
+                  }`}
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: `${tierColor}30`,
+                          borderColor: tierColor,
+                          color: tierColor,
+                        }
+                      : undefined
+                  }
+                >
+                  <span
+                    className="inline-block w-2 h-2 rounded-full mr-1.5"
+                    style={{ backgroundColor: tierColor }}
+                  />
+                  {district.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -113,10 +134,11 @@ export default function Home() {
               <div>
                 <MapPin className="mx-auto h-12 w-12 text-muted-foreground" />
                 <h2 className="mt-4 text-xl font-semibold">
-                  Select a District
+                  Select a Neighborhood
                 </h2>
                 <p className="mt-1 text-muted-foreground">
-                  Click on the map to view detailed heat and community data.
+                  Click on the map to view detailed heat and community data for
+                  any of Montgomery&apos;s 14 neighborhoods.
                 </p>
               </div>
             </div>

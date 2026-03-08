@@ -7,9 +7,9 @@ import Header from "@/components/layout/header";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "HeatAlert Dashboard",
+  title: "HEATDEBT — Urban Thermal Intelligence",
   description:
-    "Real-time heat vulnerability monitoring for Montgomery, Alabama. Powered by NWS weather data, Montgomery Open Data, and Google Gemini AI.",
+    "Real-time heat vulnerability monitoring for Montgomery, Alabama. 14 neighborhoods analyzed with Open-Meteo, Census ACS, EPA data, and Google Gemini AI.",
 };
 
 export default function RootLayout({

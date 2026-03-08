@@ -1,5 +1,5 @@
 /**
- * Application-wide constants for HeatAlert Dashboard.
+ * Application-wide constants for HEATDEBT — Urban Thermal Intelligence Platform.
  * Single source of truth for coordinates, API URLs, thresholds, and color scales.
  */
 
@@ -39,6 +39,9 @@ export const HEAT_RISK_THRESHOLDS = {
 /** Heat risk levels */
 export type HeatRisk = "Low" | "Medium" | "High" | "Very High";
 
+/** HEATDEBT risk tier (from neighbourhood scoring) */
+export type RiskTier = "CRITICAL" | "HIGH" | "MODERATE" | "LOW";
+
 /** Hex colors for heat risk levels (used by Leaflet — cannot use Tailwind classes) */
 export const HEAT_RISK_HEX: Record<HeatRisk, string> = {
   Low: "#22c55e",
@@ -47,12 +50,28 @@ export const HEAT_RISK_HEX: Record<HeatRisk, string> = {
   "Very High": "#ef4444",
 } as const;
 
+/** Hex colors for HEATDEBT risk tiers */
+export const RISK_TIER_HEX: Record<RiskTier, string> = {
+  CRITICAL: "#ef4444",
+  HIGH: "#f97316",
+  MODERATE: "#f59e0b",
+  LOW: "#22c55e",
+} as const;
+
 /** Tailwind fill classes for heat risk levels (used by non-map UI) */
 export const HEAT_RISK_FILL: Record<HeatRisk, string> = {
   Low: "bg-green-500",
   Medium: "bg-amber-500",
   High: "bg-orange-500",
   "Very High": "bg-red-500",
+} as const;
+
+/** Tailwind fill classes for HEATDEBT risk tiers */
+export const RISK_TIER_FILL: Record<RiskTier, string> = {
+  CRITICAL: "bg-red-500",
+  HIGH: "bg-orange-500",
+  MODERATE: "bg-amber-500",
+  LOW: "bg-green-500",
 } as const;
 
 /** CartoDB dark basemap tile URL (free, no API key) */

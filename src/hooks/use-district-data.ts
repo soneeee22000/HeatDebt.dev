@@ -1,6 +1,6 @@
 /**
  * React hook that fetches and merges all data sources into enriched District objects.
- * Combines: static GeoJSON + NWS weather + ArcGIS facilities/violations/crime.
+ * Combines: static GeoJSON + Open-Meteo weather + ArcGIS + AirNow + Census ACS.
  */
 
 "use client";
@@ -15,10 +15,19 @@ interface MontgomeryData {
   facilities: FacilityRecord[];
   violations: CodeViolationRecord[];
   crimes: Array<{ latitude: number; longitude: number }>;
+  airQuality: { aqi: number; category: string; pollutant: string } | null;
+  censusTracts: Array<{
+    tract: string;
+    population: number;
+    povertyCount: number;
+    povertyRate: number;
+  }>;
   meta: {
     facilitiesCount: number;
     violationsCount: number;
     crimesCount: number;
+    hasAirQuality: boolean;
+    censusTractCount: number;
     fetchedAt: string;
     source: string;
   };
@@ -92,7 +101,8 @@ export function useDistrictData(): UseDistrictDataReturn {
         setDistricts(enrichedDistricts);
         setWeather(weatherData);
         setDataSource(
-          montgomeryData?.meta?.source ?? "Montgomery, AL Open Data Portal",
+          montgomeryData?.meta?.source ??
+            "Open-Meteo · Census ACS · EPA AirNow",
         );
         setLastUpdated(
           montgomeryData?.meta?.fetchedAt ?? new Date().toISOString(),

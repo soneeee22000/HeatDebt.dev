@@ -4,7 +4,13 @@ import { useState, useTransition } from "react";
 import type { District } from "@/lib/district-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Sparkles, LoaderCircle } from "lucide-react";
+import {
+  FileText,
+  Sparkles,
+  LoaderCircle,
+  Copy,
+  CheckCircle2,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { handleGenerateReport } from "@/app/actions";
 import type { GenerateGrantReportSummaryOutput } from "@/ai/flows/generate-grant-report-summary-flow";
@@ -20,6 +26,8 @@ const GrantDetails = ({
   summary: GenerateGrantReportSummaryOutput;
   district: District;
 }) => {
+  const [copied, setCopied] = useState(false);
+
   const narrative = summary.narrative
     .replace(/\[DISTRICT_NAME\]/g, district.name)
     .replace(/\[CITY_NAME\]/g, "Montgomery")
@@ -29,6 +37,12 @@ const GrantDetails = ({
     .replace(/\[POPULATION\]/g, district.population.toLocaleString())
     .replace(/\[GREEN_SPACE_PERCENT\]/g, `${district.greenSpacePercentage}%`)
     .replace(/\[AC_ACCESS_PERCENT\]/g, `${district.acAccessPercentage}%`);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(narrative);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="mt-6 space-y-6">
@@ -72,11 +86,34 @@ const GrantDetails = ({
       </Card>
 
       <div className="rounded-lg border border-border bg-muted/30 p-4">
-        <h3 className="font-semibold text-primary-foreground/90 mb-2">
-          Grant Application Narrative
-        </h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-primary-foreground/90">
+            Grant Application Narrative
+          </h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs gap-1.5"
+            onClick={handleCopy}
+          >
+            {copied ? (
+              <>
+                <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                <span className="text-green-500">Copied</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                Copy Text
+              </>
+            )}
+          </Button>
+        </div>
         <p className="text-sm whitespace-pre-wrap text-primary-foreground/90 leading-relaxed">
           {narrative}
+        </p>
+        <p className="text-[10px] text-muted-foreground mt-3">
+          Paste directly into grants.gov · SF-424 · EPA 4700-4
         </p>
       </div>
     </div>

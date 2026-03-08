@@ -1,19 +1,20 @@
 /**
- * District data types and utilities for HeatAlert Dashboard.
+ * District data types and utilities for HEATDEBT.
  * This module defines the enriched District type that combines
  * static GeoJSON data with live API data.
  */
 
-import type { HeatRisk } from "@/lib/constants";
+import type { HeatRisk, RiskTier } from "@/lib/constants";
 import {
   computeHeatRisk,
   HEAT_RISK_HEX,
   HEAT_RISK_FILL,
+  RISK_TIER_HEX,
 } from "@/lib/constants";
 import type { DistrictFeature } from "@/lib/montgomery-geojson";
 import type { FacilityRecord, CodeViolationRecord } from "@/lib/api/arcgis";
 
-export type { HeatRisk };
+export type { HeatRisk, RiskTier };
 
 /** Enriched district data combining static + live sources */
 export interface District {
@@ -37,6 +38,18 @@ export interface District {
   violationsCount: number;
   /** Crime incidents count in area */
   crimeCount: number;
+  /** Census tract ID */
+  censusTract: string;
+  /** HEATDEBT vulnerability score (0-100) */
+  heatScore: number;
+  /** Tree canopy coverage percentage */
+  treeCanopyPct: number;
+  /** Vacancy rate percentage */
+  vacancyRate: number;
+  /** Poverty rate percentage */
+  povertyRate: number;
+  /** Risk tier: CRITICAL, HIGH, MODERATE, LOW */
+  riskTier: RiskTier;
 }
 
 /**
@@ -79,6 +92,12 @@ export function buildDistricts(
       nearbyFacilities: nearby,
       violationsCount,
       crimeCount,
+      censusTract: props.censusTract,
+      heatScore: props.heatScore,
+      treeCanopyPct: props.treeCanopyPct,
+      vacancyRate: props.vacancyRate,
+      povertyRate: props.povertyRate,
+      riskTier: props.riskTier,
     };
   });
 }
@@ -131,3 +150,4 @@ function countNearbyPoints(
 /** Re-export color maps for backward compatibility */
 export const heatRiskColors = HEAT_RISK_FILL;
 export const heatRiskHexColors = HEAT_RISK_HEX;
+export const riskTierHexColors = RISK_TIER_HEX;

@@ -1,6 +1,7 @@
 /**
- * City-wide overview bar showing live weather and aggregate heat risk stats.
- * Displays at the top of the dashboard for immediate context.
+ * City-wide summary bar showing live weather and aggregate heat risk stats.
+ * Displays at the top of the dashboard. All values are city-wide averages,
+ * NOT dynamic per-district.
  */
 
 "use client";
@@ -14,6 +15,7 @@ import {
   AlertTriangle,
   Users,
   Cloud,
+  Activity,
 } from "lucide-react";
 
 interface CityOverviewBarProps {
@@ -29,7 +31,7 @@ export default function CityOverviewBar({
   dataSource,
   lastUpdated,
 }: CityOverviewBarProps) {
-  const highRiskCount = districts.filter(
+  const criticalCount = districts.filter(
     (d) => d.heatRisk === "High" || d.heatRisk === "Very High",
   ).length;
 
@@ -55,14 +57,24 @@ export default function CityOverviewBar({
   return (
     <div className="w-full border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="container max-w-screen-2xl px-4 py-2">
+        {/* Section title */}
+        <div className="flex items-center gap-2 mb-1.5">
+          <Activity className="h-3.5 w-3.5 text-orange-500" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">
+            City Summary — All 14 Districts
+          </span>
+          {/* Single pulsing live indicator */}
+          <span className="relative flex h-2 w-2 ml-1">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+          </span>
+          <span className="text-[10px] font-semibold text-green-500">Live</span>
+        </div>
+
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
           {/* Live weather */}
           {weather && (
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-              </span>
               <Cloud className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
                 {weather.textDescription}
@@ -109,11 +121,11 @@ export default function CityOverviewBar({
           <div className="hidden sm:block h-4 w-px bg-border" />
 
           {/* Risk summary */}
-          {highRiskCount > 0 && (
+          {criticalCount > 0 && (
             <div className="flex items-center gap-1.5">
-              <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />
-              <span className="text-xs font-medium text-orange-400">
-                {highRiskCount} district{highRiskCount > 1 ? "s" : ""} at
+              <AlertTriangle className="h-3.5 w-3.5 text-red-500" />
+              <span className="text-xs font-medium text-red-400">
+                {criticalCount} district{criticalCount > 1 ? "s" : ""} at
                 elevated risk
               </span>
             </div>

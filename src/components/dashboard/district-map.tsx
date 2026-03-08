@@ -1,6 +1,7 @@
 /**
  * Interactive Leaflet map displaying Montgomery, AL districts.
  * Each district is a clickable GeoJSON polygon color-coded by heat risk.
+ * Includes pulsing dots at district centroids indicating risk level.
  * Uses CartoDB dark tiles to match the app's dark theme.
  */
 
@@ -10,7 +11,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { District } from "@/lib/district-data";
-import { heatRiskHexColors } from "@/lib/district-data";
+import { heatRiskHexColors, riskTierHexColors } from "@/lib/district-data";
 import {
   MONTGOMERY_CENTER,
   MAP_ZOOM,
@@ -34,6 +35,7 @@ export default function DistrictMap({
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const layersRef = useRef<Map<number, L.GeoJSON>>(new Map());
+  const markersRef = useRef<Map<number, L.Marker>>(new Map());
 
   // Initialize map once
   useEffect(() => {
@@ -59,7 +61,7 @@ export default function DistrictMap({
     };
   }, []);
 
-  // Render district polygons
+  // Render district polygons + pulsing dots
   useEffect(() => {
     const map = mapRef.current;
     if (!map || districts.length === 0) return;
@@ -67,10 +69,13 @@ export default function DistrictMap({
     // Clear existing layers
     layersRef.current.forEach((layer) => layer.remove());
     layersRef.current.clear();
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current.clear();
 
     districts.forEach((district) => {
       const isSelected = selectedDistrict?.id === district.id;
       const color = heatRiskHexColors[district.heatRisk];
+      const tierColor = riskTierHexColors[district.riskTier];
 
       const layer = L.geoJSON(district.feature, {
         style: {
@@ -89,8 +94,9 @@ export default function DistrictMap({
       // Tooltip with district info
       layer.bindTooltip(
         `<div class="text-sm font-semibold">${district.name}</div>
+         <div class="text-xs" style="color:${tierColor}">${district.riskTier} · Score ${district.heatScore}/100</div>
          <div class="text-xs">Heat Index: ${district.heatIndex}°F</div>
-         <div class="text-xs">Risk: ${district.heatRisk}</div>`,
+         <div class="text-xs">Tract ${district.censusTract}</div>`,
         {
           sticky: true,
           className: "district-tooltip",
@@ -125,6 +131,35 @@ export default function DistrictMap({
 
       layer.addTo(map);
       layersRef.current.set(district.id, layer);
+
+      // Add pulsing dot marker at centroid
+      const pulseClass =
+        district.riskTier === "CRITICAL"
+          ? "pulse-critical"
+          : district.riskTier === "HIGH"
+            ? "pulse-high"
+            : district.riskTier === "MODERATE"
+              ? "pulse-moderate"
+              : "pulse-low";
+
+      const dotIcon = L.divIcon({
+        className: `district-pulse-dot ${pulseClass}`,
+        iconSize: [12, 12],
+        iconAnchor: [6, 6],
+        html: `<div class="pulse-ring"></div><div class="pulse-core"></div>`,
+      });
+
+      const marker = L.marker([district.centroid[0], district.centroid[1]], {
+        icon: dotIcon,
+        interactive: true,
+      });
+
+      marker.on("click", () => {
+        onSelectDistrict(district);
+      });
+
+      marker.addTo(map);
+      markersRef.current.set(district.id, marker);
     });
   }, [districts, selectedDistrict, onSelectDistrict]);
 
@@ -159,6 +194,81 @@ export default function DistrictMap({
         }
         .leaflet-control-zoom a:hover {
           background: hsl(345 15% 20%) !important;
+        }
+
+        /* Pulsing dot markers */
+        .district-pulse-dot {
+          background: transparent !important;
+          border: none !important;
+        }
+        .district-pulse-dot .pulse-core {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          z-index: 2;
+        }
+        .district-pulse-dot .pulse-ring {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          opacity: 0;
+          z-index: 1;
+          animation: pulse-ring 2s ease-out infinite;
+        }
+
+        /* CRITICAL — red */
+        .pulse-critical .pulse-core {
+          background: #ef4444;
+          box-shadow: 0 0 6px 2px rgba(239, 68, 68, 0.6);
+        }
+        .pulse-critical .pulse-ring {
+          border: 2px solid #ef4444;
+        }
+
+        /* HIGH — orange */
+        .pulse-high .pulse-core {
+          background: #f97316;
+          box-shadow: 0 0 6px 2px rgba(249, 115, 22, 0.5);
+        }
+        .pulse-high .pulse-ring {
+          border: 2px solid #f97316;
+        }
+
+        /* MODERATE — amber */
+        .pulse-moderate .pulse-core {
+          background: #f59e0b;
+          box-shadow: 0 0 4px 1px rgba(245, 158, 11, 0.4);
+        }
+        .pulse-moderate .pulse-ring {
+          border: 2px solid #f59e0b;
+        }
+
+        /* LOW — green, no pulse animation */
+        .pulse-low .pulse-core {
+          background: #22c55e;
+          box-shadow: 0 0 3px 1px rgba(34, 197, 94, 0.3);
+        }
+        .pulse-low .pulse-ring {
+          display: none;
+        }
+
+        @keyframes pulse-ring {
+          0% {
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0.7;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(2);
+            opacity: 0;
+          }
         }
       `}</style>
     </div>

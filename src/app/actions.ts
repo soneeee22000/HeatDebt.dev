@@ -28,6 +28,12 @@ interface DistrictInput {
   identifiedNeeds: string;
   violationsCount?: number;
   crimeCount?: number;
+  censusTract?: string;
+  heatScore?: number;
+  treeCanopyPct?: number;
+  vacancyRate?: number;
+  povertyRate?: number;
+  riskTier?: string;
 }
 
 export async function handleGenerateReport(
