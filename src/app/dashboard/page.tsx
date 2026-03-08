@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import type { District } from "@/lib/district-data";
 import { RISK_TIER_HEX } from "@/lib/constants";
@@ -41,9 +41,11 @@ export default function DashboardPage() {
   );
 
   // Auto-select first district once data loads
-  if (districts.length > 0 && !selectedDistrict) {
-    setSelectedDistrict(districts[0]);
-  }
+  useEffect(() => {
+    if (districts.length > 0 && !selectedDistrict) {
+      setSelectedDistrict(districts[0]);
+    }
+  }, [districts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>
