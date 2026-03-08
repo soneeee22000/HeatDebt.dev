@@ -337,7 +337,7 @@ export default function LandingPage() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Built by Erisa &amp; Adeline &middot; GenAI Hackathon 2026
+              Built by Sone, Erisa &amp; Adeline &middot; GenAI Hackathon 2026
             </p>
           </div>
         </div>
