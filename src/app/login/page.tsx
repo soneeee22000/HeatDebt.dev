@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { validateCredentials, setAuthCookie } from "@/lib/auth";
-import { Lock } from "lucide-react";
+import { Lock, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -111,6 +111,17 @@ export default function LoginPage() {
             </p>
           </CardContent>
         </Card>
+
+        {/* Back to Home */}
+        <div className="text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary-foreground transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );
