@@ -13,7 +13,10 @@ export type MapLayer =
   | "treeCanopy"
   | "acAccess"
   | "povertyRate"
-  | "vacancyRate";
+  | "vacancyRate"
+  | "population"
+  | "airQuality"
+  | "coolingCenters";
 
 interface LayerConfig {
   /** Display label */
@@ -81,6 +84,37 @@ export const MAP_LAYER_CONFIG: Record<
     extractValue: (d) => d.vacancyRate,
     inverted: false,
     legendLabels: { low: "Low vacancy", high: "High vacancy" },
+  },
+  population: {
+    label: "Population Density",
+    shortLabel: "Pop.",
+    unit: "",
+    colorStops: ["#bfdbfe", "#3b82f6", "#1e3a8a"],
+    extractValue: (d) => d.population,
+    inverted: false,
+    legendLabels: { low: "Low density", high: "High density" },
+  },
+  airQuality: {
+    label: "Air Quality",
+    shortLabel: "Air",
+    unit: "",
+    colorStops: ["#22c55e", "#f59e0b", "#dc2626"],
+    extractValue: (d) => {
+      const map: Record<string, number> = { Low: 25, Moderate: 50, High: 75 };
+      return map[d.pollutionRate] ?? 50;
+    },
+    inverted: false,
+    legendLabels: { low: "Good air", high: "Poor air" },
+  },
+  coolingCenters: {
+    label: "Cooling Centers",
+    shortLabel: "Cooling",
+    unit: "",
+    colorStops: ["#fecaca", "#60a5fa", "#1d4ed8"],
+    extractValue: (d) =>
+      d.communityFacilities.length + d.nearbyFacilities.length,
+    inverted: true,
+    legendLabels: { low: "No facilities", high: "Many facilities" },
   },
 };
 

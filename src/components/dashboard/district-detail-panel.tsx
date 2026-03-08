@@ -46,21 +46,43 @@ interface StatItemProps {
   value: string | number;
   unit?: string;
   isLive?: boolean;
+  isActive?: boolean;
+  onClick?: () => void;
 }
 
-/** Individual stat display */
+/** Individual stat display — optionally clickable to toggle map layer */
 function StatItem({
   icon: Icon,
   label,
   value,
   unit,
   isLive = false,
+  isActive = false,
+  onClick,
 }: StatItemProps) {
+  const Wrapper = onClick ? "button" : "div";
   return (
-    <div className="flex items-center space-x-3 rounded-lg bg-muted/50 p-3">
+    <Wrapper
+      type={onClick ? "button" : undefined}
+      onClick={onClick}
+      className={`flex items-center space-x-3 rounded-lg p-3 text-left transition-all ${
+        isActive
+          ? "bg-accent/10 ring-1 ring-accent/40"
+          : onClick
+            ? "bg-muted/50 hover:bg-muted/70 cursor-pointer"
+            : "bg-muted/50"
+      }`}
+    >
       <Icon className="h-5 w-5 text-accent flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+          {label}
+          {isActive && (
+            <span className="text-[9px] font-semibold text-accent uppercase tracking-wider">
+              on map
+            </span>
+          )}
+        </p>
         <p className="text-sm font-bold text-primary-foreground">
           {value}
           {unit && (
@@ -79,7 +101,7 @@ function StatItem({
           <span className="text-[10px] font-semibold text-green-500">Live</span>
         </div>
       )}
-    </div>
+    </Wrapper>
   );
 }
 
@@ -216,6 +238,12 @@ export default function DistrictDetailPanel({
             icon={Users}
             label="Population"
             value={district.population.toLocaleString()}
+            isActive={activeLayer === "population"}
+            onClick={() =>
+              onLayerChange(
+                activeLayer === "population" ? "score" : "population",
+              )
+            }
           />
           <StatItem
             icon={Sun}
@@ -227,6 +255,12 @@ export default function DistrictDetailPanel({
             icon={Wind}
             label="Air Quality"
             value={district.pollutionRate}
+            isActive={activeLayer === "airQuality"}
+            onClick={() =>
+              onLayerChange(
+                activeLayer === "airQuality" ? "score" : "airQuality",
+              )
+            }
           />
           <StatItem
             icon={CloudRain}
@@ -250,6 +284,12 @@ export default function DistrictDetailPanel({
               district.nearbyFacilities.length
             }
             unit="nearby"
+            isActive={activeLayer === "coolingCenters"}
+            onClick={() =>
+              onLayerChange(
+                activeLayer === "coolingCenters" ? "score" : "coolingCenters",
+              )
+            }
           />
         </div>
       </div>

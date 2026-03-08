@@ -14,6 +14,9 @@ import {
   TrendingDown,
   Home,
   BarChart3,
+  Users,
+  Wind,
+  Building,
 } from "lucide-react";
 
 const LAYER_ICONS: Record<MapLayer, React.ElementType> = {
@@ -23,6 +26,9 @@ const LAYER_ICONS: Record<MapLayer, React.ElementType> = {
   acAccess: AirVent,
   povertyRate: TrendingDown,
   vacancyRate: Home,
+  population: Users,
+  airQuality: Wind,
+  coolingCenters: Building,
 };
 
 const LAYERS: MapLayer[] = [
@@ -32,6 +38,9 @@ const LAYERS: MapLayer[] = [
   "acAccess",
   "povertyRate",
   "vacancyRate",
+  "population",
+  "airQuality",
+  "coolingCenters",
 ];
 
 interface MapLayerControlProps {
