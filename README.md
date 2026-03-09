@@ -16,6 +16,7 @@
   <img src="https://img.shields.io/badge/TypeScript-Strict-3178C6?style=flat-square&logo=typescript" alt="TypeScript"/>
   <img src="https://img.shields.io/badge/Leaflet-Interactive%20Map-199900?style=flat-square&logo=leaflet" alt="Leaflet"/>
   <img src="https://img.shields.io/badge/Gemini-AI%20Analysis-4285F4?style=flat-square&logo=google" alt="Gemini"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License"/>
 </p>
 
 ---
