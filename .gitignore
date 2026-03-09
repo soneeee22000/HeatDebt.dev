@@ -20,3 +20,5 @@ yarn-error.log*
 
 # Misc
 .DS_Store
+CLAUDE.md
+tsconfig.tsbuildinfo
