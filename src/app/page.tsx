@@ -11,43 +11,65 @@ import {
   FileText,
   ArrowRight,
   Database,
+  Layers,
+  DollarSign,
+  BarChart3,
 } from "lucide-react";
 
 const STATS = [
-  { value: "60s", label: "Time to generate a full risk report" },
-  { value: "$127K", label: "Average grant value per neighborhood" },
-  { value: "14", label: "Montgomery neighborhoods analyzed" },
-  { value: "8x", label: "Faster than manual EJ assessments" },
-  { value: "6", label: "Live data layers integrated" },
+  { value: "14", label: "Pages per due diligence report" },
+  { value: "9", label: "Interactive map layers" },
+  { value: "14", label: "Montgomery census tracts analyzed" },
+  { value: "7", label: "Real grant programs in database" },
+  { value: "2", label: "Export formats — PDF & Word" },
 ];
 
-const PILLARS = [
+const FEATURES = [
   {
     icon: Thermometer,
-    title: "Live Intelligence",
+    title: "Live Data Pipeline",
     description:
-      "Real-time thermal, demographic, and environmental data from NWS, Census ACS, EPA AirNow, and Montgomery Open Data — updated every 10 minutes.",
+      "Open-Meteo weather API (primary) with NWS fallback, US Census ACS demographics, Montgomery ArcGIS facilities & violations — refreshed every 10 minutes.",
+  },
+  {
+    icon: Layers,
+    title: "9-Layer Interactive Map",
+    description:
+      "Switchable choropleth layers for heat score, exposure, tree canopy, A/C access, poverty, vacancy, population, air quality, and cooling centers on dark CartoDB tiles.",
   },
   {
     icon: Brain,
-    title: "AI Correlation",
+    title: "AI Risk Analysis",
     description:
-      "Google Gemini analyzes the intersection of heat exposure, poverty, tree canopy, A/C access, and vacancy rates to score neighborhood vulnerability 0-100.",
+      "Google Gemini scores each neighborhood 0-100 by analyzing heat exposure, poverty, tree canopy deficit, A/C access gaps, and vacancy rates with prioritized recommendations.",
   },
   {
     icon: FileText,
-    title: "Grant Automation",
+    title: "14-Page Due Diligence Reports",
     description:
-      "One-click EPA Environmental Justice grant narratives with auto-filled budget tables, intervention priorities, and copy-ready application text.",
+      "Dual-format PDF and Word exports with 5 sections: district overview, real-time dashboard, risk matrix, cross-layer correlations, and grant strategy with cost tables.",
+  },
+  {
+    icon: DollarSign,
+    title: "Grant Database & Strategy",
+    description:
+      "7 real grants (EPA EJCPS, HUD CDBG, FEMA BRIC, LIHEAP, Alabama Power SHARE, ADECA, HHS OAA) with AI-generated application narratives and eligibility matching.",
+  },
+  {
+    icon: BarChart3,
+    title: "Cost Estimates & ROI",
+    description:
+      "Computed intervention costs (A/C distribution, tree planting, cool pavement, weatherization), benefit-cost ratios, sub-group vulnerability breakdowns, and implementation timelines.",
   },
 ];
 
 const DATA_SOURCES = [
-  "NWS Weather API",
   "Open-Meteo",
+  "NWS Weather API",
   "US Census ACS",
   "EPA AirNow",
   "Montgomery ArcGIS",
+  "USDA NLCD",
   "CartoDB",
 ];
 
@@ -94,9 +116,10 @@ export default function LandingPage() {
             measure and repay it.
           </h2>
           <p className="animate-fade-in-delay-2 mt-8 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Real-time urban thermal intelligence for Montgomery, Alabama.
-            Identify the most heat-vulnerable communities, generate AI-powered
-            risk analyses, and auto-fill EPA grant applications — in seconds.
+            Real-time urban thermal intelligence for Montgomery, Alabama. 9
+            interactive map layers, AI-powered risk scoring via Google Gemini,
+            and 14-page due diligence reports with cost estimates, ROI analysis,
+            and grant application narratives — ready for stakeholders.
           </p>
           <div className="animate-fade-in-delay-3 mt-10 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -251,41 +274,43 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Three Pillars */}
+      {/* Features */}
       <section
         id="pillars"
         className="container max-w-screen-xl mx-auto px-4 py-24 lg:py-32"
       >
         <div className="text-center mb-16">
           <h3 className="text-3xl lg:text-4xl font-extrabold text-primary-foreground">
-            Three Layers of Intelligence
+            Full-Stack Thermal Intelligence
           </h3>
           <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">
-            From raw sensor data to grant-ready documents, HEATDEBT automates
-            the entire environmental justice workflow.
+            From live sensor data to 14-page grant-ready reports, HEATDEBT
+            automates the entire environmental justice workflow.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PILLARS.map((pillar, i) => {
-            const delayClass =
-              i === 0
-                ? "animate-fade-in-up-delay-1"
-                : i === 1
-                  ? "animate-fade-in-up-delay-2"
-                  : "animate-fade-in-up-delay-3";
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {FEATURES.map((feature, i) => {
+            const delays = [
+              "animate-fade-in-up-delay-1",
+              "animate-fade-in-up-delay-2",
+              "animate-fade-in-up-delay-3",
+              "animate-fade-in-up-delay-1",
+              "animate-fade-in-up-delay-2",
+              "animate-fade-in-up-delay-3",
+            ];
             return (
               <div
-                key={pillar.title}
-                className={`card-glow rounded-2xl border border-border/30 bg-card/30 backdrop-blur-sm p-8 space-y-4 ${delayClass}`}
+                key={feature.title}
+                className={`card-glow rounded-2xl border border-border/30 bg-card/30 backdrop-blur-sm p-8 space-y-4 ${delays[i]}`}
               >
                 <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-orange-500/10 border border-orange-500/20">
-                  <pillar.icon className="h-7 w-7 text-orange-500" />
+                  <feature.icon className="h-7 w-7 text-orange-500" />
                 </div>
                 <h4 className="text-lg font-bold text-primary-foreground">
-                  {pillar.title}
+                  {feature.title}
                 </h4>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  {pillar.description}
+                  {feature.description}
                 </p>
               </div>
             );
