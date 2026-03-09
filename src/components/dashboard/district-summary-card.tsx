@@ -189,15 +189,18 @@ export default function DistrictSummaryCard({
 
   return (
     <Card className="bg-card/70 border-primary/20">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2">
         <div className="flex items-center space-x-3">
-          <Brain className="h-5 w-5 text-primary" />
-          <div>
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary/15">
+            <Brain className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
             <CardTitle className="text-lg text-primary-foreground">
               Risk Analysis
             </CardTitle>
-            <p className="text-xs text-muted-foreground">
-              Powered by Google Gemini
+            <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+              AI-powered vulnerability assessment with risk scoring, key
+              findings, and prioritized intervention recommendations
             </p>
           </div>
         </div>

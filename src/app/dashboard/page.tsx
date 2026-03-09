@@ -91,18 +91,14 @@ export default function DashboardPage() {
             />
           )}
 
-          {/* Layer control overlay */}
-          <div className="absolute bottom-24 left-6 z-[1000]">
+          {/* Map controls — stacked vertically with gap to prevent overlap */}
+          <div className="absolute bottom-6 left-6 z-[1000] flex flex-col gap-2.5">
             <MapLayerControl
               activeLayer={activeLayer}
               onLayerChange={setActiveLayer}
               polygonsVisible={polygonsVisible}
               onTogglePolygons={() => setPolygonsVisible((v) => !v)}
             />
-          </div>
-
-          {/* Map legend overlay */}
-          <div className="absolute bottom-6 left-6 z-[1000]">
             <HeatmapLegend activeLayer={activeLayer} districts={districts} />
           </div>
         </div>

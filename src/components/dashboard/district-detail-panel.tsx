@@ -381,39 +381,54 @@ export default function DistrictDetailPanel({
         />
       </div>
 
-      {/* Full Report */}
-      <div className="pt-2 pb-6 space-y-3">
-        <div className="flex gap-2">
-          <Button
-            className="flex-1 bg-primary hover:bg-primary/90"
-            disabled={reportLoading}
-            onClick={() => handleReport("pdf")}
-          >
-            {reportLoading ? (
-              <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
-            ) : (
-              <FileBarChart className="mr-2 h-4 w-4" />
-            )}
-            {reportLoading ? "Generating..." : "PDF Report"}
-          </Button>
-          <Button
-            className="flex-1"
-            variant="outline"
-            disabled={reportLoading}
-            onClick={() => handleReport("docx")}
-          >
-            {reportLoading ? (
-              <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
-            ) : (
-              <FileDown className="mr-2 h-4 w-4" />
-            )}
-            {reportLoading ? "Generating..." : "Word Report"}
-          </Button>
-        </div>
-        <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-          Generates a full vulnerability report with AI analysis
-        </p>
-      </div>
+      {/* Full Report Export */}
+      <Card className="bg-card/70 border-accent/20">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-accent/15">
+              <FileBarChart className="h-5 w-5 text-accent" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-bold text-primary-foreground">
+                Full Vulnerability Report
+              </h3>
+              <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">
+                Multi-page report with data analysis, neighborhood comparison,
+                AI interventions, and EPA grant narrative — ready for
+                stakeholders
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              className="flex-1 bg-primary hover:bg-primary/90"
+              disabled={reportLoading}
+              onClick={() => handleReport("pdf")}
+            >
+              {reportLoading ? (
+                <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+              ) : (
+                <FileBarChart className="mr-2 h-4 w-4" />
+              )}
+              {reportLoading ? "Generating..." : "Download PDF"}
+            </Button>
+            <Button
+              className="flex-1"
+              variant="outline"
+              disabled={reportLoading}
+              onClick={() => handleReport("docx")}
+            >
+              {reportLoading ? (
+                <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+              ) : (
+                <FileDown className="mr-2 h-4 w-4" />
+              )}
+              {reportLoading ? "Generating..." : "Download Word"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      <div className="pb-6" />
     </div>
   );
 }
