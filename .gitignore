@@ -18,6 +18,9 @@ yarn-error.log*
 .env.production
 .env.test
 
+# Remotion rendered output
+/out/
+
 # Misc
 .DS_Store
 CLAUDE.md

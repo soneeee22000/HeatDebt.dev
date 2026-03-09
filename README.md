@@ -43,6 +43,21 @@ Urban heat islands kill more Americans annually than hurricanes, tornadoes, and 
 
 ---
 
+## Demo Video
+
+A 75-second programmatic demo video is included, built with [Remotion](https://remotion.dev) — a React framework that renders video frame-by-frame at 1920x1080.
+
+```bash
+npm run remotion:preview   # Interactive preview in browser
+npm run remotion:render    # Render to out/demo.mp4 (H.264, ~5 MB)
+```
+
+**10 animated scenes:** Intro → Problem Statement → Solution Pipeline → 9-Layer Map → AI Risk Analysis → 14-Page Reports → Grant Database → Tech Stack → Team → Outro.
+
+All scenes use spring-based animations, animated score rings, progress bars, and fade transitions. Source in `remotion/`.
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -174,6 +189,7 @@ graph LR
 | **City Data**  | Montgomery ArcGIS REST APIs                   |
 | **AI**         | Google Genkit + Gemini 2.5 Flash              |
 | **Reports**    | HTML-to-PDF (window.print) + docx (Word)      |
+| **Demo Video** | Remotion (React-based programmatic video)     |
 | **Auth**       | Lightweight session-based auth                |
 | **Deployment** | Vercel                                        |
 
@@ -251,10 +267,12 @@ No other API keys needed — weather and map tiles are free and unauthenticated.
 ### Development
 
 ```bash
-npm run dev        # http://localhost:9002
-npm run build      # Production build
-npm run lint       # ESLint
-npm run typecheck  # tsc --noEmit
+npm run dev              # http://localhost:9002
+npm run build            # Production build
+npm run lint             # ESLint
+npm run typecheck        # tsc --noEmit
+npm run remotion:preview # Demo video preview
+npm run remotion:render  # Render demo video to out/demo.mp4
 ```
 
 ---
