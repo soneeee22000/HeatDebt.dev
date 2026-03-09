@@ -79,9 +79,25 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Build a comparison table row */
+function buildCompareRow(d: District, isCurrent: boolean): string {
+  const cls = (v: number, hot: number, warn: number) =>
+    v >= hot ? "val-bad" : v >= warn ? "val-warn" : "val-ok";
+  const clsInv = (v: number, hot: number, warn: number) =>
+    v < hot ? "val-bad" : v < warn ? "val-warn" : "val-ok";
+  return `<tr>
+    <td>${isCurrent ? `<strong>${esc(d.name)} (this report)</strong>` : esc(d.name)}</td>
+    <td class="${cls(d.heatScore, 75, 50)}">${d.heatScore} / 100</td>
+    <td class="${cls(d.povertyRate, 40, 20)}">${d.povertyRate}%</td>
+    <td class="${clsInv(d.treeCanopyPct, 10, 20)}">${d.treeCanopyPct}%</td>
+    <td class="${clsInv(d.acAccessPercentage, 60, 75)}">${d.acAccessPercentage}%</td>
+  </tr>`;
+}
+
 /** Build the full HTML document string */
 function buildReportHTML(
   district: District,
+  allDistricts: District[],
   aiSummary: DistrictSummaryOutput | null,
   grantReport: GenerateGrantReportSummaryOutput | null,
 ): string {
@@ -126,7 +142,7 @@ function buildReportHTML(
     const narrative = replaceNarrativeVars(grantReport.narrative, district);
     grantHTML = `
     <div class="sec">
-      <div class="sec-num">Section 04</div>
+      <div class="sec-num">Section 05</div>
       <h2>Recommended Grant &amp; Application Narrative</h2>
       <p>Based on this neighborhood's profile, the following federal grant is the strongest match.</p>
       <div class="grant-box">
@@ -317,6 +333,29 @@ function buildReportHTML(
   .dc-value.ok   { color: var(--teal); }
   .dc-sub { font-size: 11px; color: var(--mid); margin-top: 3px; }
 
+  .compare-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+  .compare-table th {
+    background: var(--ink); color: #fff;
+    padding: 10px 16px; text-align: left;
+    font-size: 11px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .compare-table td {
+    padding: 11px 16px; border-bottom: 1px solid var(--rule);
+    color: #3A3A4A;
+  }
+  .compare-table tr:nth-child(even) td { background: var(--light); }
+  .compare-table .val-bad  { color: var(--red);    font-weight: 700; }
+  .compare-table .val-warn { color: var(--orange); font-weight: 700; }
+  .compare-table .val-ok   { color: var(--teal);   font-weight: 600; }
+
+  .facility-list { list-style: none; padding: 0; margin: 16px 0; }
+  .facility-list li {
+    padding: 8px 16px; border-left: 3px solid var(--teal);
+    margin-bottom: 8px; background: var(--light);
+    font-size: 13px; color: var(--ink);
+  }
+
   .intervention {
     border: 1px solid var(--rule);
     border-left: 4px solid var(--teal);
@@ -482,6 +521,44 @@ function buildReportHTML(
           <div class="dc-sub">nearby facilities</div>
         </div>
       </div>
+
+      <!-- Neighborhood comparison -->
+      ${(() => {
+        const sorted = [...allDistricts].sort(
+          (a, b) => a.heatScore - b.heatScore,
+        );
+        const lowest = sorted[0];
+        const mid = sorted[Math.floor(sorted.length / 2)];
+        const avgPoverty = Math.round(
+          allDistricts.reduce((s, d) => s + d.povertyRate, 0) /
+            allDistricts.length,
+        );
+        const avgTree = Math.round(
+          allDistricts.reduce((s, d) => s + d.treeCanopyPct, 0) /
+            allDistricts.length,
+        );
+        const avgAC = Math.round(
+          allDistricts.reduce((s, d) => s + d.acAccessPercentage, 0) /
+            allDistricts.length,
+        );
+        return `<table class="compare-table">
+          <thead><tr>
+            <th>Neighborhood</th><th>Heat Score</th><th>Poverty</th><th>Tree Cover</th><th>A/C Access</th>
+          </tr></thead>
+          <tbody>
+            ${buildCompareRow(district, true)}
+            ${mid.id !== district.id ? buildCompareRow(mid, false) : ""}
+            ${lowest.id !== district.id && lowest.id !== mid.id ? buildCompareRow(lowest, false) : ""}
+            <tr>
+              <td>City Average</td>
+              <td>${Math.round(allDistricts.reduce((s, d) => s + d.heatScore, 0) / allDistricts.length)} / 100</td>
+              <td>${avgPoverty}%</td>
+              <td>${avgTree}%</td>
+              <td>${avgAC}%</td>
+            </tr>
+          </tbody>
+        </table>`;
+      })()}
     </div>
 
     <!-- SECTION 2: WHY -->
@@ -517,14 +594,74 @@ function buildReportHTML(
       }
     </div>
 
-    <!-- SECTION 4: GRANT -->
+    <!-- SECTION 4: COMMUNITY RESOURCES -->
+    <div class="sec">
+      <div class="sec-num">Section 04</div>
+      <h2>Community Resources &amp; Facilities</h2>
+      <p>The following community facilities and cooling centers are located within or near this census tract.</p>
+      ${
+        district.communityFacilities.length > 0
+          ? `
+        <h3 style="font-family:'DM Serif Display',serif;font-size:18px;margin:20px 0 10px;">Community Facilities</h3>
+        <ul class="facility-list">
+          ${district.communityFacilities.map((f) => `<li>${esc(f)}</li>`).join("\n")}
+        </ul>
+      `
+          : ""
+      }
+      ${
+        district.nearbyFacilities.length > 0
+          ? `
+        <h3 style="font-family:'DM Serif Display',serif;font-size:18px;margin:20px 0 10px;">Nearby Facilities</h3>
+        <ul class="facility-list">
+          ${district.nearbyFacilities
+            .slice(0, 8)
+            .map(
+              (f) =>
+                `<li><strong>${esc(f.name)}</strong>${f.type ? ` — ${esc(f.type)}` : ""}${f.address ? `<br><span style="color:var(--mid);font-size:12px;">${esc(f.address)}</span>` : ""}</li>`,
+            )
+            .join("\n")}
+        </ul>
+      `
+          : ""
+      }
+      ${
+        district.violationsCount > 0 || district.crimeCount > 0
+          ? `
+        <h3 style="font-family:'DM Serif Display',serif;font-size:18px;margin:20px 0 10px;">Safety Indicators</h3>
+        <div class="data-grid" style="grid-template-columns: repeat(2, 1fr);">
+          ${
+            district.violationsCount > 0
+              ? `<div class="data-cell">
+            <div class="dc-label">Code Violations</div>
+            <div class="dc-value ${severity(district.violationsCount, { hot: 10, warn: 5 })}">${district.violationsCount}</div>
+            <div class="dc-sub">within census tract</div>
+          </div>`
+              : ""
+          }
+          ${
+            district.crimeCount > 0
+              ? `<div class="data-cell">
+            <div class="dc-label">Safety Incidents</div>
+            <div class="dc-value ${severity(district.crimeCount, { hot: 15, warn: 8 })}">${district.crimeCount}</div>
+            <div class="dc-sub">within census tract</div>
+          </div>`
+              : ""
+          }
+        </div>
+      `
+          : ""
+      }
+    </div>
+
+    <!-- SECTION 5: GRANT -->
     ${
       grantHTML ||
       `
     <div class="sec">
-      <div class="sec-num">Section 04</div>
+      <div class="sec-num">Section 05</div>
       <h2>Grant Application Narrative</h2>
-      <p>Grant recommendations require AI analysis. Generate a Grant Report from the dashboard to populate this section.</p>
+      <p>Grant recommendations require AI analysis. Generate a Risk Analysis from the dashboard to populate this section.</p>
     </div>`
     }
 
@@ -592,22 +729,29 @@ function buildLoadingHTML(districtName: string): string {
 </html>`;
 }
 
+export type ReportFormat = "pdf" | "docx";
+
 /**
  * Generate a premium full report for a district.
- * Opens a new window immediately (to avoid popup blockers),
- * shows a loading state, fetches AI data, then renders the report.
+ * PDF: Opens a new window with styled HTML + print dialog.
+ * DOCX: Downloads a formatted Word document.
  */
-export async function generateFullReport(district: District): Promise<void> {
-  // Open window SYNCHRONOUSLY (on user click) to avoid popup blockers
-  const reportWindow = window.open("", "_blank");
-  if (!reportWindow) {
-    alert("Please allow popups for this site to generate reports.");
-    return;
+export async function generateFullReport(
+  district: District,
+  allDistricts: District[],
+  format: ReportFormat = "pdf",
+): Promise<void> {
+  // For PDF: open window SYNCHRONOUSLY (on user click) to avoid popup blockers
+  let reportWindow: Window | null = null;
+  if (format === "pdf") {
+    reportWindow = window.open("", "_blank");
+    if (!reportWindow) {
+      alert("Please allow popups for this site to generate reports.");
+      return;
+    }
+    reportWindow.document.write(buildLoadingHTML(district.name));
+    reportWindow.document.close();
   }
-
-  // Show loading state immediately
-  reportWindow.document.write(buildLoadingHTML(district.name));
-  reportWindow.document.close();
 
   const input = toDistrictInput(district);
 
@@ -626,15 +770,19 @@ export async function generateFullReport(district: District): Promise<void> {
       ? (grantResult.value.summary ?? null)
       : null;
 
-  const html = buildReportHTML(district, aiSummary, grantReport);
+  if (format === "docx") {
+    const { generateDocxReport } = await import("./docx-report");
+    await generateDocxReport(district, allDistricts, aiSummary, grantReport);
+    return;
+  }
 
-  // Replace loading page with the actual report
-  reportWindow.document.open();
-  reportWindow.document.write(html);
-  reportWindow.document.close();
+  // PDF path
+  const html = buildReportHTML(district, allDistricts, aiSummary, grantReport);
+  reportWindow!.document.open();
+  reportWindow!.document.write(html);
+  reportWindow!.document.close();
 
-  // Trigger print after fonts load
   setTimeout(() => {
-    reportWindow.print();
+    reportWindow!.print();
   }, 1500);
 }

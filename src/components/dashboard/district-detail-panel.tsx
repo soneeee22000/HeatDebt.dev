@@ -28,11 +28,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import DistrictSummaryCard from "./district-summary-card";
-import { generateFullReport } from "./pdf-report";
+import { generateFullReport, type ReportFormat } from "./pdf-report";
 import { Button } from "@/components/ui/button";
+import { FileText, FileDown } from "lucide-react";
 
 interface DistrictDetailPanelProps {
   district: District;
+  allDistricts: District[];
   activeLayer: MapLayer;
   onLayerChange: (layer: MapLayer) => void;
   weather?: WeatherData | null;
@@ -131,12 +133,23 @@ const VULN_BAR_LAYERS: Record<string, Exclude<MapLayer, "score">> = {
 
 export default function DistrictDetailPanel({
   district,
+  allDistricts,
   activeLayer,
   onLayerChange,
   weather,
 }: DistrictDetailPanelProps) {
   const riskColor = HEAT_RISK_HEX[district.heatRisk];
   const [reportLoading, setReportLoading] = useState(false);
+
+  /** Generate report in the specified format */
+  const handleReport = async (format: ReportFormat) => {
+    setReportLoading(true);
+    try {
+      await generateFullReport(district, allDistricts, format);
+    } finally {
+      setReportLoading(false);
+    }
+  };
 
   return (
     <div className="h-full p-4 lg:p-6 space-y-5">
@@ -370,27 +383,35 @@ export default function DistrictDetailPanel({
 
       {/* Full Report */}
       <div className="pt-2 pb-6 space-y-3">
-        <Button
-          className="w-full bg-primary hover:bg-primary/90"
-          disabled={reportLoading}
-          onClick={async () => {
-            setReportLoading(true);
-            try {
-              await generateFullReport(district);
-            } finally {
-              setReportLoading(false);
-            }
-          }}
-        >
-          {reportLoading ? (
-            <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
-          ) : (
-            <FileBarChart className="mr-2 h-4 w-4" />
-          )}
-          {reportLoading ? "Generating Report..." : "Generate Full Report"}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 bg-primary hover:bg-primary/90"
+            disabled={reportLoading}
+            onClick={() => handleReport("pdf")}
+          >
+            {reportLoading ? (
+              <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+            ) : (
+              <FileBarChart className="mr-2 h-4 w-4" />
+            )}
+            {reportLoading ? "Generating..." : "PDF Report"}
+          </Button>
+          <Button
+            className="flex-1"
+            variant="outline"
+            disabled={reportLoading}
+            onClick={() => handleReport("docx")}
+          >
+            {reportLoading ? (
+              <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+            ) : (
+              <FileDown className="mr-2 h-4 w-4" />
+            )}
+            {reportLoading ? "Generating..." : "Word Report"}
+          </Button>
+        </div>
         <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-          Generates a full 5-section vulnerability report with AI analysis
+          Generates a full vulnerability report with AI analysis
         </p>
       </div>
     </div>

@@ -151,6 +151,7 @@ export default function DashboardPage() {
           {selectedDistrict ? (
             <DistrictDetailPanel
               district={selectedDistrict}
+              allDistricts={districts}
               activeLayer={activeLayer}
               onLayerChange={setActiveLayer}
               weather={weather}
