@@ -547,12 +547,68 @@ function buildReportHTML(
 </html>`;
 }
 
+/** Loading page shown while AI data is being fetched */
+function buildLoadingHTML(districtName: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>HEATDEBT Report — Generating...</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&display=swap');
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #1A1A2A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .loader {
+    text-align: center;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: #E67E22;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1 { font-size: 24px; margin-bottom: 8px; }
+  p { color: rgba(255,255,255,0.5); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="loader">
+  <div class="spinner"></div>
+  <h1>Generating Report</h1>
+  <p>${districtName} — Fetching AI analysis...</p>
+</div>
+</body>
+</html>`;
+}
+
 /**
  * Generate a premium full report for a district.
- * Fetches AI data in parallel, builds HTML, opens in new window for print-to-PDF.
- * Returns a promise that resolves when the report window is opened.
+ * Opens a new window immediately (to avoid popup blockers),
+ * shows a loading state, fetches AI data, then renders the report.
  */
 export async function generateFullReport(district: District): Promise<void> {
+  // Open window SYNCHRONOUSLY (on user click) to avoid popup blockers
+  const reportWindow = window.open("", "_blank");
+  if (!reportWindow) {
+    alert("Please allow popups for this site to generate reports.");
+    return;
+  }
+
+  // Show loading state immediately
+  reportWindow.document.write(buildLoadingHTML(district.name));
+  reportWindow.document.close();
+
   const input = toDistrictInput(district);
 
   // Fetch both AI analyses in parallel — gracefully handle failures
@@ -572,20 +628,8 @@ export async function generateFullReport(district: District): Promise<void> {
 
   const html = buildReportHTML(district, aiSummary, grantReport);
 
-  // Open in new window and write the report
-  const reportWindow = window.open("", "_blank");
-  if (!reportWindow) {
-    // Fallback: download as HTML file
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `HEATDEBT_${district.name.replace(/\s+/g, "_")}_Report.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-    return;
-  }
-
+  // Replace loading page with the actual report
+  reportWindow.document.open();
   reportWindow.document.write(html);
   reportWindow.document.close();
 

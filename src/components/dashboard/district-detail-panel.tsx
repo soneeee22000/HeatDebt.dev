@@ -27,7 +27,6 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import { useState } from "react";
-import GrantReportGenerator from "./grant-report-generator";
 import DistrictSummaryCard from "./district-summary-card";
 import { generateFullReport } from "./pdf-report";
 import { Button } from "@/components/ui/button";
@@ -365,14 +364,6 @@ export default function DistrictDetailPanel({
       <div className="pt-2">
         <DistrictSummaryCard
           key={`summary-${district.id}`}
-          district={district}
-        />
-      </div>
-
-      {/* AI Grant Report Tool — key forces remount on district change */}
-      <div>
-        <GrantReportGenerator
-          key={`grant-${district.id}`}
           district={district}
         />
       </div>
