@@ -30,15 +30,15 @@ Urban heat islands kill more Americans annually than hurricanes, tornadoes, and 
 
 ## What It Does
 
-| Feature                        | Description                                                                                                                                        |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Interactive Choropleth Map** | 14 real US Census TIGER/Line tract boundaries on a dark CartoDB basemap. Click any vulnerability factor to recolor the entire map.                 |
-| **9 Map Layers**               | Toggle between HEATDEBT Score, Heat Exposure, Tree Canopy, A/C Access, Poverty Rate, Vacancy Rate, Population, Air Quality, and Cooling Centers.   |
-| **Live Weather Integration**   | Real-time temperature, humidity, UV index, precipitation, and wind from Open-Meteo (free, no API key). NWS fallback.                               |
-| **AI Risk Analysis**           | Per-district vulnerability assessment powered by Google Gemini 2.5 Flash — risk score, key findings, prioritized recommendations, budget estimate. |
-| **Premium PDF Reports**        | One-click full report generation: 4-section professional document (cover, data grid, interventions, grant narrative) with browser print-to-PDF.    |
-| **Montgomery Open Data**       | Live integration with ArcGIS REST APIs for code violations, crime incidents, and community facilities.                                             |
-| **Polygon Visibility Toggle**  | Eye/EyeOff control to show or hide district overlays while keeping pulsing risk markers visible.                                                   |
+| Feature                        | Description                                                                                                                                                           |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Interactive Choropleth Map** | 14 real US Census TIGER/Line tract boundaries on a dark CartoDB basemap. Click any vulnerability factor to recolor the entire map.                                    |
+| **9 Map Layers**               | Toggle between HEATDEBT Score, Heat Exposure, Tree Canopy, A/C Access, Poverty Rate, Vacancy Rate, Population, Air Quality, and Cooling Centers.                      |
+| **Live Weather Integration**   | Real-time temperature, humidity, UV index, precipitation, and wind from Open-Meteo (free, no API key). NWS fallback.                                                  |
+| **AI Risk Analysis**           | Per-district vulnerability assessment powered by Google Gemini 2.5 Flash — risk score, key findings, prioritized recommendations, budget estimate.                    |
+| **Dual-Format Reports**        | Full vulnerability report in PDF or Word (.docx): cover page, data grid with neighborhood comparison, AI interventions, community resources, and EPA grant narrative. |
+| **Montgomery Open Data**       | Live integration with ArcGIS REST APIs for code violations, crime incidents, and community facilities.                                                                |
+| **Polygon Visibility Toggle**  | Eye/EyeOff control to show or hide district overlays while keeping pulsing risk markers visible.                                                                      |
 
 ---
 
@@ -63,7 +63,7 @@ graph TB
         BUILD["buildDistricts()"]
         MAP["DistrictMap (Leaflet)"]
         PANEL["DistrictDetailPanel"]
-        REPORT["PDF Report Generator"]
+        REPORT["Report Generator (PDF + DOCX)"]
         RISK["Risk Analysis Card"]
     end
 
@@ -111,7 +111,7 @@ sequenceDiagram
     Dashboard->>AI: Promise.allSettled([riskAnalysis, grantNarrative])
     AI->>AI: Gemini 2.5 Flash generates structured output
     AI-->>Dashboard: AI results (or graceful fallback)
-    Dashboard->>User: Opens premium report in new tab + print dialog
+    Dashboard->>User: PDF: new tab + print dialog / DOCX: direct download
 ```
 
 ### Map Layer System
@@ -172,7 +172,7 @@ graph LR
 | **Weather**    | Open-Meteo API (primary) + NWS API (fallback) |
 | **City Data**  | Montgomery ArcGIS REST APIs                   |
 | **AI**         | Google Genkit + Gemini 2.5 Flash              |
-| **PDF**        | Browser-native HTML-to-PDF (window.print)     |
+| **Reports**    | HTML-to-PDF (window.print) + docx (Word)      |
 | **Auth**       | Lightweight session-based auth                |
 | **Deployment** | Vercel                                        |
 
@@ -203,7 +203,8 @@ src/
 │   │   ├── map-layer-control.tsx     # 9-layer toggle panel
 │   │   ├── heatmap-legend.tsx        # Dynamic legend
 │   │   ├── district-summary-card.tsx # AI risk analysis
-│   │   ├── pdf-report.tsx            # Premium HTML report builder
+│   │   ├── pdf-report.tsx            # Premium HTML report builder (PDF)
+│   │   ├── docx-report.ts            # Word document report builder (DOCX)
 │   │   └── city-overview-bar.tsx     # Live weather header
 │   ├── layout/
 │   └── ui/                   # shadcn/ui primitives
@@ -293,14 +294,15 @@ npm run typecheck  # tsc --noEmit
 
 ## Report Generation
 
-The **Generate Full Report** button produces a professional 4-section vulnerability report:
+Two export formats — **PDF** (opens in new tab with print dialog) and **Word (.docx)** (direct download). Both produce a multi-page professional vulnerability report:
 
 1. **Cover** — District name, HEATDEBT score ring, risk tier badge, census tract, date
-2. **The Thermal Reality** — 9-cell data grid (heat index, poverty, tree canopy, A/C access, vacancy, air quality, population, green space, cooling centers)
-3. **Vulnerability Analysis** — AI-generated risk assessment, key findings, prioritized interventions
-4. **Grant Application Narrative** — AI-generated EPA Environmental Justice grant narrative with template variables pre-filled
+2. **The Thermal Reality** — 9-cell data grid (heat index, poverty, tree canopy, A/C access, vacancy, air quality, population, green space, cooling centers) + **neighborhood comparison table** ranking all 14 tracts
+3. **Vulnerability Analysis** — AI-generated risk assessment, key findings, prioritized interventions with budget estimates
+4. **Community Resources & Facilities** — Mapped community facilities, nearby cooling centers, code violations, and safety indicators
+5. **Grant Application Narrative** — AI-generated EPA Environmental Justice grant narrative with template variables pre-filled
 
-Reports open in a new browser tab with the print dialog for saving as PDF.
+AI analysis uses `Promise.allSettled` for parallel calls to Gemini with graceful fallback if either request fails.
 
 ---
 
