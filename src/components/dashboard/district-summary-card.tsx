@@ -194,7 +194,7 @@ export default function DistrictSummaryCard({
           <Brain className="h-5 w-5 text-primary" />
           <div>
             <CardTitle className="text-lg text-primary-foreground">
-              AI Risk Analysis
+              Risk Analysis
             </CardTitle>
             <p className="text-xs text-muted-foreground">
               Powered by Google Gemini

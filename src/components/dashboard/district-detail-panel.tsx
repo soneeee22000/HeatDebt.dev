@@ -23,14 +23,13 @@ import {
   AlertTriangle,
   ShieldAlert,
   MapPin,
-  Download,
   FileBarChart,
+  LoaderCircle,
 } from "lucide-react";
 import { useState } from "react";
 import GrantReportGenerator from "./grant-report-generator";
 import DistrictSummaryCard from "./district-summary-card";
-import PaymentModal from "./payment-modal";
-import { generateDistrictPDF } from "./pdf-report";
+import { generateFullReport } from "./pdf-report";
 import { Button } from "@/components/ui/button";
 
 interface DistrictDetailPanelProps {
@@ -138,7 +137,7 @@ export default function DistrictDetailPanel({
   weather,
 }: DistrictDetailPanelProps) {
   const riskColor = HEAT_RISK_HEX[district.heatRisk];
-  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
 
   return (
     <div className="h-full p-4 lg:p-6 space-y-5">
@@ -378,33 +377,31 @@ export default function DistrictDetailPanel({
         />
       </div>
 
-      {/* Full Report + PDF Download */}
+      {/* Full Report */}
       <div className="pt-2 pb-6 space-y-3">
         <Button
           className="w-full bg-primary hover:bg-primary/90"
-          onClick={() => setPaymentOpen(true)}
+          disabled={reportLoading}
+          onClick={async () => {
+            setReportLoading(true);
+            try {
+              await generateFullReport(district);
+            } finally {
+              setReportLoading(false);
+            }
+          }}
         >
-          <FileBarChart className="mr-2 h-4 w-4" />
-          Generate Full Report
-        </Button>
-        <Button
-          variant="outline"
-          className="w-full border-accent/30 hover:bg-accent/10"
-          onClick={() => generateDistrictPDF(district)}
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Download PDF Report
+          {reportLoading ? (
+            <LoaderCircle className="animate-spin mr-2 h-4 w-4" />
+          ) : (
+            <FileBarChart className="mr-2 h-4 w-4" />
+          )}
+          {reportLoading ? "Generating Report..." : "Generate Full Report"}
         </Button>
         <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-          Generate AI analyses above first for a complete report
+          Generates a full 5-section vulnerability report with AI analysis
         </p>
       </div>
-
-      <PaymentModal
-        district={district}
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-      />
     </div>
   );
 }
