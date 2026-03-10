@@ -19,6 +19,11 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License"/>
 </p>
 
+
+<p align="center">
+  <img src="docs/screenshot-hero.png" alt="HEATDEBT Screenshot" width="100%" />
+</p>
+
 ---
 
 ## The Problem
