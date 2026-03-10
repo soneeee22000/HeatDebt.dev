@@ -74,5 +74,14 @@
     "remotion": "^4.0.434",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
-  }
+  },
+  "keywords": [
+    "nextjs",
+    "typescript",
+    "leaflet",
+    "urban-analytics",
+    "heat-vulnerability",
+    "climate",
+    "hackathon"
+  ]
 }
